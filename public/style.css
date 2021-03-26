@@ -1,0 +1,24 @@
+* {
+    margin: 1px;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.cursor {
+	position: absolute;
+
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+
+	background: black;
+}
+
+.scorebar {
+	display: inline-block;
+}
+
+#gas{
+
+	justify-content: flex-end;
+}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Content-Language" content="fr">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+
+    <link rel="stylesheet" href="style.css" type="text/css"/>
+
+    <script src="../socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="javascript.js" defer></script>
+  
+</head>
+<!--
+<script>
+    window.addEventListener('load', function() {
+
+    // initial state of the game
+    let state = {moves: 0, hp: 100, xp: 0};
+    
+    // the display that will show what happens
+    const food = document.getElementById('food');
+    food.innerHTML = 'Your status is now: ' + JSON.stringify(state);
+                    //`your hp is ${state.hp}, and ...`;
+});
+</script> -->
+<script>
+    scores = {moves: 0, hp: 100, xp: 0, gas: 0, wood: 0, iron: 0, water: 0, food: 0};
+    myJSON = JSON.stringify(scores);
+    localStorage.setItem("testJSON", myJSON);
+
+    text = localStorage.getItem("testJSON");
+    scores = JSON.parse(text);
+    console.log(scores); 
+    console.log(scores.hp); 
+</script>
+
+
+<body>
+    
+    <!-- <input type="button" value="Write to the server" id="poke" /> -->
+    <div class="scorebar">
+        <div id="ressources">Ressources</div>
+        <div id="gas">Gas: 0</div>
+        <div id="wood">Wood: 0</div>
+        <div id="iron">Iron: 0</div>
+        <div id="water">Water: 0</div>
+        <div id="food">Food: 0</div>
+    </div>
+    <div class="scorebar">
+        <div id="room">Nightfall</div>
+        <div id="moves">Moves: 0</div>
+        <div id="hp">HP: 100</div>
+        <div id="xp">XP: 0</div>
+    </div>
+
+
+
+    <form>
+        <label for="example">Yes ?</label>
+        
+        <input type="text" value="" id="user_command" />
+      
+        <input type="button" value="Send" id="user_input" onclick="functionClick()">
+    </form>
+
+    <div>
+        <div id="history"></div>
+    </div>
+
+
+
+    
+
+</body>
+
+
+</html>
