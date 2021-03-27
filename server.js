@@ -1,4 +1,5 @@
 var http = require('http');
+var port = process.env.PORT || 3000
 var express = require('express');
 var app = express();
 
@@ -24,5 +25,6 @@ io.on('connection', function (socket) {
 
 });
 
-server.listen(8080);
-console.log("Serveur sur http://localhost:8080/ ou http://MON.IP:8080/");
+server.listen(port,() => {
+  console.log(`Server running at port `+port);
+});
