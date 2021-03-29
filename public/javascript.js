@@ -1,5 +1,3 @@
-
-
 var player = {
     inventory:[],
     location: ""
@@ -34,8 +32,66 @@ function init() {
     var user_input = document.querySelector("#user_input");
     user_input.addEventListener("click", submitCommand);
 
+    /* AJAX */
+    
+    // GET
+    ajaxGet();
+    // POST
+    ajaxPost();
+
 }
 
+function ajaxGet() {
+    $.getJSON('/data/data.json', function(data) {
+        console.log(data);
+    })
+    .fail(function() {
+        console.log("error");
+    })
+}
+
+function ajaxPost(){
+    var formData = {
+        "moves": 0,
+        "hp": 100, // HP change
+        "xp": 0,
+        "gas": 0,
+        "wood": 0,
+        "iron": 0,
+        "water": 0,
+        "food": 0
+    };
+    console.log(formData["moves"]);
+    $.ajax({
+        type : "POST",
+        contentType : "application/json",
+        url : "/",
+        data : JSON.stringify(formData),
+        dataType : 'json',
+        success: function(data) {
+            console.log(data);
+        },
+        error: function(e) {
+            console.log("ERROR: ", e);
+        }
+    });
+}
+
+function ajaxReadAndWrite(item){ //incomplet !!!!!!!!!!!!!!!!!!!
+    //const {ipcRenderer} = require('electron')
+    //import { createRequire } from 'module';
+    /*const require = createRequire(import.meta.url);
+    const fs = require(['fs']);
+    let file = fs.readFileSync('/data/data.json');
+    let data = JSON.parse(file);
+    if (item=="hp"){
+        data["hp"]--;
+    }
+    else{
+        data[item]++;
+    }*/
+    console.log("ajaxreadandwrite");
+}
 
 function submitCommand() {
     var user_command = document.querySelector("#user_command");
@@ -51,8 +107,8 @@ function parseCommand(command) {
     // "go north"
 
     switch(command[0]) {
-        case "go":
-            go(command);
+        case "search":
+            search();
             break;
         case "teleport":
             teleport(command);
@@ -63,84 +119,43 @@ function parseCommand(command) {
 
 }
 
-function go(direction) {
-    var direction = direction[1];
+function search() {
     var item = "";
     var saveHistory = document.getElementById('history').innerHTML;
     var history = "";
 
-    switch(direction) {
-        case "north":
-            console.log("north");
-            history = history + "You went North.";
-            break;
-        case "south":
-            console.log("south");
-            history = history + "You went South.";
-            break;
-        case "east":
-            console.log("east");
-            history = history + "You went East.";
-            break;
-        case "west":
-            console.log("west");
-            history = history + "You went West.";
-            break;
-        default:
-            invalidCommand(direction);
-
-    }
     switch(Math.floor(Math.random() * 9) + 1) {
         case 1:
             item = "gas";
-            text = localStorage.getItem("testJSON");
-            scores = JSON.parse(text);
-            scores.gas = scores.gas+1;
-            myJSON = JSON.stringify(scores);
-            localStorage.setItem("testJSON", myJSON);
-            document.getElementById('gas').innerHTML = "Gas: "+ scores.gas;
             break;
         case 2:
             item = "wood";
-            text = localStorage.getItem("testJSON");
-            scores = JSON.parse(text);
-            scores.wood = scores.wood+1;
-            myJSON = JSON.stringify(scores);
-            localStorage.setItem("testJSON", myJSON);
-            document.getElementById('wood').innerHTML = "Wood: "+ scores.wood;
             break;
         case 3:
             item = "iron";
-            text = localStorage.getItem("testJSON");
-            scores = JSON.parse(text);
-            scores.iron = scores.iron+1;
-            myJSON = JSON.stringify(scores);
-            localStorage.setItem("testJSON", myJSON);
-            document.getElementById('iron').innerHTML = "Iron: "+ scores.iron;
             break;
         case 4:
             item = "water";
-            text = localStorage.getItem("testJSON");
-            scores = JSON.parse(text);
-            scores.water = scores.water+1;
-            myJSON = JSON.stringify(scores);
-            localStorage.setItem("testJSON", myJSON);
-            document.getElementById('water').innerHTML = "Water: "+ scores.water;
             break;
         case 5:
             item = "food";
-            text = localStorage.getItem("testJSON");
-            scores = JSON.parse(text);
-            scores.food = scores.food+1;
-            myJSON = JSON.stringify(scores);
-            localStorage.setItem("testJSON", myJSON);
-            document.getElementById('food').innerHTML = "Food: "+ scores.food;
             break;
         default:
             item = "nothing";
     }
-    history = history + " You found " + item;
+    if (item != "nothing"){
+        //text = localStorage.getItem("testJSON");//read file
+        //scores = JSON.parse(text);
+        //scores[item] ++;
+        //myJSON = JSON.stringify(scores);
+        //localStorage.setItem("testJSON", myJSON);//write file
+        //document.getElementById(item).innerHTML = (item.charAt(0).toUpperCase() + item.substring(1).toLowerCase())+": "+ scores[item];//update score
+        
+        ajaxReadAndWrite(item);
+    }
+    history = history + "You found " + item;
     document.getElementById('history').innerHTML = history +"<br>"+ saveHistory;
+    
 }
 
 function teleport(planet) {
@@ -174,22 +189,28 @@ function invalidCommand(cmd) {
     console.log('Comande invalide', cmd);
 }
 
+function functionClickLogin() {
+    //login
+    }
 
+function functionClickLogout() {
+    //logout
+    }
 
-function functionClick() {
-    text = localStorage.getItem("testJSON");
-    scores = JSON.parse(text);
+function functionClick() { // incomplet !!!!!!!!!!!!!
+    //text = localStorage.getItem("testJSON");
+    //scores = JSON.parse(text);
 
-    console.log(scores); 
-    console.log(scores.hp); 
-    let moves = scores.moves+1;
-    let hp = scores.hp-1
-    document.getElementById('moves').innerHTML = "Moves: "+ moves;
-    document.getElementById('hp').innerHTML = "HP: "+ hp;
-    scores.moves = scores.moves+1;
-    scores.hp = scores.hp-1;
-    myJSON = JSON.stringify(scores);
-    localStorage.setItem("testJSON", myJSON);
+    //console.log(scores); 
+    //console.log(scores.hp); 
+    //let moves = scores.moves+1;
+    //let hp = scores.hp-1
+    //document.getElementById('moves').innerHTML = "Moves: "+ moves;
+    //document.getElementById('hp').innerHTML = "HP: "+ hp;
+    //scores.moves = scores.moves+1;
+    //scores.hp = scores.hp-1;
+    //myJSON = JSON.stringify(scores);
+    //localStorage.setItem("testJSON", myJSON);
 
 }
 

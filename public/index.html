@@ -9,7 +9,8 @@
 
     <link rel="stylesheet" href="style.css" type="text/css"/>
 
-    <script src="../socket.io/socket.io.js"></script>
+    <script src="https://cdn.socket.io/3.1.3/socket.io.min.js" integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh" crossorigin="anonymous" defer></script>
+    <script src="../jquery.js" defer></script>
     <script type="text/javascript" src="javascript.js" defer></script>
   
 </head>
@@ -39,7 +40,21 @@
 
 
 <body>
-    
+
+
+    <form>
+        <label for="example">Login here: </label>
+        <input type="text" value="" id="login-text" />
+        <input type="button" value="Login" id="login-button" onclick="functionClickLogin()">
+        <input type="button" value="Logout" id="logout-button" onclick="functionClickLogout()">
+    </form>
+
+
+
+    <div>Scores of the players: <br>Player1: 10XP<br>Player 2: 22XP</div>
+
+
+
     <!-- <input type="button" value="Write to the server" id="poke" /> -->
     <div class="scorebar">
         <div id="ressources">Ressources</div>
@@ -59,12 +74,12 @@
 
 
     <form>
-        <label for="example">Yes ?</label>
-        
+        <label for="example">search/teleport planet_?</label>
         <input type="text" value="" id="user_command" />
-      
         <input type="button" value="Send" id="user_input" onclick="functionClick()">
     </form>
+
+
 
     <div>
         <div id="history"></div>
