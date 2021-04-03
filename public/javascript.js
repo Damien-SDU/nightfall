@@ -1,5 +1,5 @@
 var player = {
-    inventory:[],
+    data: "",
     location: ""
 };
 
@@ -37,30 +37,23 @@ function init() {
     // GET
     ajaxGet();
     // POST
-    ajaxPost();
+    //ajaxPost();
 
 }
 
 function ajaxGet() {
     $.getJSON('/data/data.json', function(data) {
         console.log(data);
+        player.data = data;
+
+    updateHTML();
     })
     .fail(function() {
         console.log("error");
     })
 }
 
-function ajaxPost(){
-    var formData = {
-        "moves": 0,
-        "hp": 100, // HP change
-        "xp": 0,
-        "gas": 0,
-        "wood": 0,
-        "iron": 0,
-        "water": 0,
-        "food": 0
-    };
+function ajaxPost(formData){
     console.log(formData["moves"]);
     $.ajax({
         type : "POST",
@@ -150,8 +143,9 @@ function search() {
         //myJSON = JSON.stringify(scores);
         //localStorage.setItem("testJSON", myJSON);//write file
         //document.getElementById(item).innerHTML = (item.charAt(0).toUpperCase() + item.substring(1).toLowerCase())+": "+ scores[item];//update score
-        
-        ajaxReadAndWrite(item);
+        player.data[item]++;
+        ajaxPost(player.data);
+        updateHTML();
     }
     history = history + "You found " + item;
     document.getElementById('history').innerHTML = history +"<br>"+ saveHistory;
@@ -198,23 +192,26 @@ function functionClickLogout() {
     }
 
 function functionClick() { // incomplet !!!!!!!!!!!!!
-    //text = localStorage.getItem("testJSON");
-    //scores = JSON.parse(text);
-
-    //console.log(scores); 
-    //console.log(scores.hp); 
-    //let moves = scores.moves+1;
-    //let hp = scores.hp-1
-    //document.getElementById('moves').innerHTML = "Moves: "+ moves;
-    //document.getElementById('hp').innerHTML = "HP: "+ hp;
-    //scores.moves = scores.moves+1;
-    //scores.hp = scores.hp-1;
-    //myJSON = JSON.stringify(scores);
-    //localStorage.setItem("testJSON", myJSON);
-
+    console.log(player.data);
+    player.data.moves++;
+    player.data.hp--;
+    ajaxPost(player.data);
+    updateHTML();
 }
 
+function functionClickReset() {
+    var srcData = {"moves":0,"hp":100,"xp":0,"gas":0,"wood":0,"iron":0,"water":0,"food":0};
+    ajaxPost(srcData);
+    ajaxGet();
+    updateHTML();
+    }
 
+function updateHTML(){ // à compléter !
+    document.getElementById('moves').innerHTML = "Moves: "+ player.data.moves;
+    document.getElementById('gas').innerHTML = "Gas: "+ player.data.gas;
+    document.getElementById('wood').innerHTML = "Wood: "+ player.data.wood;
+    document.getElementById('hp').innerHTML = "HP: "+ player.data.hp;
+}
 
 
 /*

@@ -17,8 +17,8 @@ app.post("/", function(req,res){
     console.log(req.body);
 
     // écriture du fichier data.json
-    var content = JSON.stringify(req.body);
-    fs.writeFile("public/data/data.json", content, function (err) {
+    var formData = JSON.stringify(req.body);
+    fs.writeFile("public/data/data.json", formData, function (err) {
         if (err) return console.log(err);
     });
     
