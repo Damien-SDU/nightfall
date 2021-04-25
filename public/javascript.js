@@ -184,8 +184,11 @@ function invalidCommand(cmd) {
 }
 
 function functionClickLogin() {
-    //login
-    }
+    var user_login = document.getElementById("login_text").value;
+    console.log(user_login);
+
+}
+
 
 function functionClickLogout() {
     //logout
@@ -207,10 +210,21 @@ function functionClickReset() {
     }
 
 function updateHTML(){ // à compléter !
+    document.getElementById('text_scores').innerHTML = "<div>Scores of the players: <br>Player1: 10XP<br>Player 2: 22XP</div>";
+    
+    document.getElementById('ressources').innerHTML = "Ressources";
+    document.getElementById('room').innerHTML = "Nightfall";
     document.getElementById('moves').innerHTML = "Moves: "+ player.data.moves;
+    document.getElementById('hp').innerHTML = "HP: "+ player.data.hp;
+    document.getElementById('xp').innerHTML = "XP: "+ player.data.xp;
     document.getElementById('gas').innerHTML = "Gas: "+ player.data.gas;
     document.getElementById('wood').innerHTML = "Wood: "+ player.data.wood;
-    document.getElementById('hp').innerHTML = "HP: "+ player.data.hp;
+    document.getElementById('iron').innerHTML = "Iron: "+ player.data.iron;
+    document.getElementById('water').innerHTML = "Water: "+ player.data.water;
+    document.getElementById('food').innerHTML = "Food: "+ player.data.food;
+
+
+
 }
 
 

@@ -44,38 +44,38 @@
 
     <form>
         <label for="example">Login here: </label>
-        <input type="text" value="" id="login-text" />
-        <input type="button" value="Login" id="login-button" onclick="functionClickLogin()">
-        <input type="button" value="Logout" id="logout-button" onclick="functionClickLogout()">
-        <input type="button" value="Reset the game" id="reset-button" onclick="functionClickReset()">
+        <input type="text" value="" id="login_text" />
+        <input type="button" value="Login" id="login_button" onclick="functionClickLogin()">
+        <input type="button" value="Logout" id="logout_button" onclick="functionClickLogout()">
+        <input type="button" value="Reset the game" id="reset_button" onclick="functionClickReset()">
     </form>
 
 
 
-    <div>Scores of the players: <br>Player1: 10XP<br>Player 2: 22XP</div>
+    <div id="text_scores"></div>
 
 
 
     <!-- <input type="button" value="Write to the server" id="poke" /> -->
     <div class="scorebar">
-        <div id="ressources">Ressources</div>
-        <div id="gas">Gas: 0</div>
-        <div id="wood">Wood: 0</div>
-        <div id="iron">Iron: 0</div>
-        <div id="water">Water: 0</div>
-        <div id="food">Food: 0</div>
+        <div id="ressources"></div>
+        <div id="gas"></div>
+        <div id="wood"></div>
+        <div id="iron"></div>
+        <div id="water"></div>
+        <div id="food"></div>
     </div>
     <div class="scorebar">
-        <div id="room">Nightfall</div>
-        <div id="moves">Moves: 0</div>
-        <div id="hp">HP: 100</div>
-        <div id="xp">XP: 0</div>
+        <div id="room"></div>
+        <div id="moves"></div>
+        <div id="hp"></div>
+        <div id="xp"></div>
     </div>
 
 
 
-    <form>
-        <label for="example">search/teleport planet_?</label>
+    <form id="text_input">
+        <label id="example" for="example">search/teleport planet_?</label>
         <input type="text" value="" id="user_command" />
         <input type="button" value="Send" id="user_input" onclick="functionClick()">
     </form>
