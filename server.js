@@ -16,14 +16,18 @@ app.use(express.static('public'));
 app.post("/", function(req,res){
     console.log(req.body);
 
+    console.log("ici");
+    console.log(req.body.name);
     // écriture du fichier data.json
     var formData = JSON.stringify(req.body);
-    fs.writeFile("public/data/data.json", formData, function (err) {
+    fs.writeFile("public/data/players/"+req.body.name+".json", formData, function (err) {
         if (err) return console.log(err);
     });
     
     return res.send(req.body);
 });
+
+
 
 // SOCKET IO
 var io = require('socket.io')(http);
@@ -38,13 +42,49 @@ io.on('connection', function (socket) {
     // réception d'un message d'un client
     socket.on('message', function (message) {
         console.log('Mesage d\'un client : ' + message);
-    }); 
+    });
+    socket.on('user_connection', function (login) {
+        user_connection(socket, login);
+
+    });
 
 });
 
 http.listen(port,() => {
   console.log(`Server running at port `+port);
 });
+
+function user_connection(socket, login){
+    var sanitize_login = login.toLowerCase().split(' ').join('-').replace(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g, "-").replace(/[^a-zA-Z ]/g, "");
+
+
+    fs.readFile('public/data/players.json', 'utf8', function (err,data) {
+    if (err) {
+        return console.log(err);
+    }
+    var data = JSON.parse(data);
+
+    var key_login = Object.keys(data).find(key => data[key] === login);
+    if (key_login == undefined){
+        data[sanitize_login] = login;
+        var data = JSON.stringify(data);
+        fs.writeFile("public/data/players.json", data, function (err) {
+        if (err) return console.log(err);
+        });
+        var start_user = {"moves":0,"hp":100,"xp":0,"gas":0,"wood":0,"iron":0,"water":0,"food":0};
+        var start_user = JSON.stringify(start_user);
+        var url = "public/data/players/"+sanitize_login+".json";
+        fs.writeFile(url, start_user, function (err) {
+        if (err) return console.log(err);
+        });
+    }
+    else{
+        socket.emit('message', 'Vous êtes connecté');
+    }
+    
+
+    });
+}
 
 
 /*

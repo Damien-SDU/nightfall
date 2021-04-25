@@ -54,7 +54,7 @@ function ajaxGet() {
 }
 
 function ajaxPost(formData){
-    console.log(formData["moves"]);
+    console.log(formData.data["moves"]);
     $.ajax({
         type : "POST",
         contentType : "application/json",
@@ -91,6 +91,7 @@ function submitCommand() {
     var command = user_command.value;
 
     parseCommand(command);
+
 }
 
 function parseCommand(command) {
@@ -144,7 +145,7 @@ function search() {
         //localStorage.setItem("testJSON", myJSON);//write file
         //document.getElementById(item).innerHTML = (item.charAt(0).toUpperCase() + item.substring(1).toLowerCase())+": "+ scores[item];//update score
         player.data[item]++;
-        ajaxPost(player.data);
+        ajaxPost(player);
         updateHTML();
     }
     history = history + "You found " + item;
@@ -186,6 +187,8 @@ function invalidCommand(cmd) {
 function functionClickLogin() {
     var user_login = document.getElementById("login_text").value;
     console.log(user_login);
+    socket.emit('user_connection', user_login);
+    player.name = user_login.toLowerCase().split(' ').join('-').replace(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g, "-").replace(/[^a-zA-Z ]/g, "");
 
 }
 
@@ -198,7 +201,7 @@ function functionClick() { // incomplet !!!!!!!!!!!!!
     console.log(player.data);
     player.data.moves++;
     player.data.hp--;
-    ajaxPost(player.data);
+    ajaxPost(player);
     updateHTML();
 }
 
