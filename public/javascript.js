@@ -46,7 +46,7 @@ function ajaxGet() {
     //$.getJSON('/data/data.json', function(data) {
     $.getJSON('/data/players/'+player.name+'.json', function(data) {
         console.log(data);
-        player.data = data;
+        player.data = data.data;
 
     updateHTML();
     })
@@ -200,6 +200,7 @@ function functionClickReset() {
     }
 
 function updateHTML(){ // à compléter !
+    console.log(player.data.gas);
     document.getElementById('text_scores').innerHTML = "<div>Scores of the players: <br>Player1: 10XP<br>Player 2: 22XP</div>";
     
     document.getElementById('ressources').innerHTML = "Ressources";
