@@ -71,7 +71,9 @@ function user_connection(socket, login){
         fs.writeFile("public/data/players.json", data, function (err) {
         if (err) return console.log(err);
         });
-        var start_user = {"moves":0,"hp":100,"xp":0,"gas":0,"wood":0,"iron":0,"water":0,"food":0};
+        var start_user.location = "";
+        var start_user.name = login;
+        var start_user.data = {"moves":0,"hp":100,"xp":0,"gas":0,"wood":0,"iron":0,"water":0,"food":0};
         var start_user = JSON.stringify(start_user);
         var url = "public/data/players/"+sanitize_login+".json";
         fs.writeFile(url, start_user, function (err) {
