@@ -1,6 +1,7 @@
 var player = {
     data: "",
-    location: ""
+    location: "",
+    name: ""
 };
 
 player.location = "planet_a";
@@ -35,14 +36,15 @@ function init() {
     /* AJAX */
     
     // GET
-    ajaxGet();
+    //ajaxGet();
     // POST
     //ajaxPost();
 
 }
 
 function ajaxGet() {
-    $.getJSON('/data/data.json', function(data) {
+    //$.getJSON('/data/data.json', function(data) {
+    $.getJSON('/data/players/'+player.name+'.json', function(data) {
         console.log(data);
         player.data = data;
 
@@ -70,21 +72,6 @@ function ajaxPost(formData){
     });
 }
 
-function ajaxReadAndWrite(item){ //incomplet !!!!!!!!!!!!!!!!!!!
-    //const {ipcRenderer} = require('electron')
-    //import { createRequire } from 'module';
-    /*const require = createRequire(import.meta.url);
-    const fs = require(['fs']);
-    let file = fs.readFileSync('/data/data.json');
-    let data = JSON.parse(file);
-    if (item=="hp"){
-        data["hp"]--;
-    }
-    else{
-        data[item]++;
-    }*/
-    console.log("ajaxreadandwrite");
-}
 
 function submitCommand() {
     var user_command = document.querySelector("#user_command");
@@ -189,7 +176,7 @@ function functionClickLogin() {
     console.log(user_login);
     socket.emit('user_connection', user_login);
     player.name = user_login.toLowerCase().split(' ').join('-').replace(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g, "-").replace(/[^a-zA-Z ]/g, "");
-
+    ajaxGet();
 }
 
 
