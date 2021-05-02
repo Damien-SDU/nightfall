@@ -1,12 +1,16 @@
 var player = {
-    data: "",
+    name: "",
     location: "",
-    name: ""
+    data: ""
 };
 
-player.location = "planet_a";
-var room = player.location;
+var planet_coefficients = {
+    "planet_a":{"gas":15,"wood":30,"iron":45,"water":60,"food":75, "weapon":76},
+    "planet_b":{"gas":5,"wood":20,"iron":55,"water":70,"food":75, "weapon":76},
+    "planet_c":{"gas":20,"wood":25,"iron":30,"water":50,"food":70, "weapon":71},
+}
 
+var number_zombies = {"planet_a":0, "planet_b":0, "planet_c":0}
 
 document.addEventListener("DOMContentLoaded", function() {
     init();
@@ -56,7 +60,7 @@ function ajaxGet() {
 }
 
 function ajaxPost(formData){
-    console.log(formData.data["moves"]);
+    //console.log(formData.data["moves"]);
     $.ajax({
         type : "POST",
         contentType : "application/json",
@@ -86,17 +90,77 @@ function parseCommand(command) {
     var command = command.split(" ");
 
     // "go north"
+    //socket.emit('message', 'You are logged in');
 
-    switch(command[0]) {
-        case "search":
-            search();
-            break;
-        case "teleport":
-            teleport(command);
-            break;
-        default:
-            invalidCommand(command);
+
+    // x%y proba zombies
+
+    if (player.data.hp>0){
+        //var loca=player.location;
+        //console.log(loca);
+        //if (number_zombies[loca] == 0) {
+            switch(command[0]) {
+                case "search":
+                    search();
+                    break;
+                case "teleport":
+                    if (player.data.gas>=20){
+                        teleport(command);
+                    }
+                    else{
+                        alert('You don\'t have enough gas');
+                    }
+                    break;
+                case "eat":
+                    if (player.data.food>0){
+                            eat();
+                        }
+                        else{
+                            alert('You don\'t have enough food');
+                        }
+                    break;
+                case "drink":
+                    if (player.data.water>0){
+                            drink();
+                        }
+                        else{
+                            alert('You don\'t have enough water');
+                        }
+                    break;
+                case "weapon":
+                case "build":
+                    if (player.data.wood>9 && player.data.iron>9){
+                            weapon();
+                        }
+                        else{
+                            alert('You don\'t have enough wood or iron');
+                        }
+                    break;
+                default:
+                    invalidCommand(command);
+                    alert('Unvalid request');
+            }
+        /*}
+        else { // zombies attack
+            switch(command[0]) {
+                case "kill":
+                    kill();
+                    break;
+                case "hide":
+                    hide();
+                    break;
+                }
+        }*/
+
+
+
+
+
     }
+    else {
+        alert('Game Over');
+    }
+    updateHTML();
 
 }
 
@@ -104,26 +168,38 @@ function search() {
     var item = "";
     var saveHistory = document.getElementById('history').innerHTML;
     var history = "";
-
-    switch(Math.floor(Math.random() * 9) + 1) {
-        case 1:
-            item = "gas";
-            break;
-        case 2:
-            item = "wood";
-            break;
-        case 3:
-            item = "iron";
-            break;
-        case 4:
-            item = "water";
-            break;
-        case 5:
-            item = "food";
-            break;
-        default:
-            item = "nothing";
+    var coef = Math.floor(Math.random() * 99) + 1;
+    //console.log(player.location);
+    if (0 <= coef && coef <= planet_coefficients.planet_a.gas){
+        console.log(coef);
+        item = "gas";
     }
+    else if (planet_coefficients.planet_a.gas < coef && coef <= planet_coefficients.planet_a.wood){
+        console.log(coef);
+        item = "wood";
+    }
+    else if (planet_coefficients.planet_a.wood <= coef && coef <= planet_coefficients.planet_a.iron){
+        console.log(coef);
+        item = "iron";
+    }
+    else if (planet_coefficients.planet_a.iron <= coef && coef <= planet_coefficients.planet_a.water){
+        console.log(coef);
+        item = "water";
+    }
+    else if (planet_coefficients.planet_a.water <= coef && coef <= planet_coefficients.planet_a.food){
+        console.log(coef);
+        item = "food";
+    }
+    else if (planet_coefficients.planet_a.food <= coef && coef <= planet_coefficients.planet_a.weapon){
+        console.log(coef);
+        item = "weapon";
+    }
+    else {
+        console.log(coef);
+        item = "nothing";
+    }
+
+
     if (item != "nothing"){
         //text = localStorage.getItem("testJSON");//read file
         //scores = JSON.parse(text);
@@ -137,13 +213,14 @@ function search() {
     }
     history = history + "You found " + item;
     document.getElementById('history').innerHTML = history +"<br>"+ saveHistory;
-    
+    player.data.moves++;
+    player.data.hp--;
 }
 
 function teleport(planet) {
     var planet = planet[1];
     
-    console.log("planète d'origine", player.location);
+    console.log("origin planet", player.location);
 
     switch(planet) {
         case "planet_a":
@@ -165,6 +242,29 @@ function teleport(planet) {
         default:
             invalidCommand(planet);
     }
+    player.data.gas = player.data.gas-20;
+    player.data.moves++;
+    player.data.hp--;
+}
+
+function eat(){
+    player.data.hp = player.data.hp+10;
+    player.data.food--;
+    player.data.moves++;
+}
+
+function drink(){
+    player.data.hp = player.data.hp+21;
+    player.data.water--;
+    player.data.moves++;
+    player.data.hp--;
+}
+
+function weapon(){
+    player.data.weapon++;
+    player.data.wood = player.data.wood-10;
+    player.data.iron = player.data.iron-10;
+    player.data.hp--;
 }
 
 function invalidCommand(cmd) {
@@ -176,6 +276,7 @@ function functionClickLogin() {
     console.log(user_login);
     socket.emit('user_connection', user_login);
     player.name = user_login.toLowerCase().split(' ').join('-').replace(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g, "-").replace(/[^a-zA-Z ]/g, "");
+    //console.log(player.location);
     ajaxGet();
 }
 
@@ -185,22 +286,20 @@ function functionClickLogout() {
     }
 
 function functionClick() { // incomplet !!!!!!!!!!!!!
-    console.log(player.data);
-    player.data.moves++;
-    player.data.hp--;
+    //console.log(player.data);
     ajaxPost(player);
     updateHTML();
 }
 
 function functionClickReset() {
-    var srcData = {"moves":0,"hp":100,"xp":0,"gas":0,"wood":0,"iron":0,"water":0,"food":0};
-    ajaxPost(srcData);
+    player.data = {"moves":0,"hp":100,"xp":0,"gas":0,"wood":0,"iron":0,"water":0,"food":0, "weapon":0};
+    player.location = "planet_a";
+    ajaxPost(player);
     ajaxGet();
     updateHTML();
     }
 
 function updateHTML(){ // à compléter !
-    console.log(player.data.gas);
     document.getElementById('text_scores').innerHTML = "<div>Scores of the players: <br>Player1: 10XP<br>Player 2: 22XP</div>";
     
     document.getElementById('ressources').innerHTML = "Ressources";
@@ -213,9 +312,7 @@ function updateHTML(){ // à compléter !
     document.getElementById('iron').innerHTML = "Iron: "+ player.data.iron;
     document.getElementById('water').innerHTML = "Water: "+ player.data.water;
     document.getElementById('food').innerHTML = "Food: "+ player.data.food;
-
-
-
+    document.getElementById('weapon').innerHTML = "Weapon: "+ player.data.weapon;
 }
 
 
