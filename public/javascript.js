@@ -158,7 +158,12 @@ function parseCommand(command) {
 
     }
     else {
-        alert('Game Over');
+        if (player.data==""){// case player not logged in
+            alert("Please log in first");
+        }
+        else{// case player died
+            alert('Game Over');
+        }
     }
     updateHTML();
 
@@ -268,7 +273,7 @@ function weapon(){
 }
 
 function invalidCommand(cmd) {
-    console.log('Comande invalide', cmd);
+    console.log('invalid command', cmd);
 }
 
 function functionClickLogin() {
@@ -278,11 +283,31 @@ function functionClickLogin() {
     player.name = user_login.toLowerCase().split(' ').join('-').replace(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g, "-").replace(/[^a-zA-Z ]/g, "");
     //console.log(player.location);
     ajaxGet();
+    update_scores();
+    document.getElementById('help').innerHTML = "Possible moves :<br>search<br>eat<br>drink<br>teleport planet_?<br>build or weapon";
 }
 
 
 function functionClickLogout() {
-    //logout
+    player.data = ""
+    player.name = ""
+    player.location = ""
+    alert("You have been logged out");
+    document.getElementById('history').innerHTML = "";
+    document.getElementById('help').innerHTML = "";
+    document.getElementById('ressources').innerHTML = "";
+    document.getElementById('room').innerHTML = "";
+    document.getElementById('moves').innerHTML = "";
+    document.getElementById('hp').innerHTML = "";
+    document.getElementById('xp').innerHTML = "";
+    document.getElementById('gas').innerHTML = "";
+    document.getElementById('wood').innerHTML = "";
+    document.getElementById('iron').innerHTML = "";
+    document.getElementById('water').innerHTML = "";
+    document.getElementById('food').innerHTML = "";
+    document.getElementById('weapon').innerHTML = "";
+
+    update_scores();
     }
 
 function functionClick() { // incomplet !!!!!!!!!!!!!
@@ -299,8 +324,41 @@ function functionClickReset() {
     updateHTML();
     }
 
+function readTextFile(file, callback) {
+    var rawFile = new XMLHttpRequest();
+    rawFile.overrideMimeType("application/json");
+    rawFile.open("GET", file, true);
+    rawFile.onreadystatechange = function() {
+        if (rawFile.readyState === 4 && rawFile.status == "200") {
+            callback(rawFile.responseText);
+        }
+    }
+    rawFile.send(null);
+}
+
+function update_scores(){
+    readTextFile("/data/players.json", function(text){
+    var data = JSON.parse(text);
+    //console.log(data);
+    //console.log(Object.keys(data).length);
+    //console.log(Object.keys(data)[8]);
+
+    document.getElementById('text_scores').innerHTML = "<div>Scores of the players:</div>";
+    for (i = 0; i < Object.keys(data).length; i++) {
+        var lll = Object.keys(data)[i];
+        readTextFile("/data/players/"+lll+".json", function(text){
+            var datall = JSON.parse(text);
+            sc = document.getElementById('text_scores').innerHTML;
+            sc = sc +"<div>" + datall.name + ": " + datall.data.xp + " XP</div>";
+            document.getElementById('text_scores').innerHTML = sc;
+    });
+    }
+    });
+}
+
 function updateHTML(){ // à compléter !
-    document.getElementById('text_scores').innerHTML = "<div>Scores of the players: <br>Player1: 10XP<br>Player 2: 22XP</div>";
+    
+    
     
     document.getElementById('ressources').innerHTML = "Ressources";
     document.getElementById('room').innerHTML = "Nightfall";

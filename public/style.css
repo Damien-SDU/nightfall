@@ -18,6 +18,14 @@
 	display: inline-block;
 }
 
+#text_scores {
+	display: inline-block;
+}
+
+#help {
+	display: inline-block;
+}
+
 #gas{
 
 	justify-content: flex-end;
