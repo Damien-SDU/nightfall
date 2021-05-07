@@ -97,9 +97,11 @@ function parseCommand(command) {
     var flag = 0;
     if (player.data.hp>0){
         if (player.data.moves>30){
-            if (Math.random()*100>90){
+            if (Math.random()*100>90){//10% risk a zombie appear
                 var loca=player.location;
                 number_zombies[loca]++;
+                document.getElementById('zombie').innerHTML = number_zombies[loca]+ " zombies!";
+                document.getElementById('ascii').style.color = '#000000';
                 flag = 1;
                 alert("A zombie arrived!");
             }
@@ -162,8 +164,8 @@ function parseCommand(command) {
                                 alert('You don\'t have enough weapon');
                             }
                         break;
-                    case "hide":
-                        hide();
+                    case "wait":
+                        wait();
                         break;
                     default:
                         invalidCommand(command);
@@ -293,10 +295,18 @@ function kill(){
     player.data.weapon--;
     var loca=player.location;
     number_zombies[loca]--;
+    if (number_zombies[loca] == 0){
+        document.getElementById('zombie').innerHTML = "";
+        document.getElementById('ascii').style.color = '#ffffff';
+    }
+    else{
+        document.getElementById('zombie').innerHTML = number_zombies[loca]+ " zombies!";
+    }
 }
 
-function hide(){
+function wait(){
     player.data.hp = player.data.hp - 20;
+    search();
 }
 
 function invalidCommand(cmd) {
@@ -312,7 +322,7 @@ function functionClickLogin() {
     //console.log(player.location);
     ajaxGet();
     update_scores();
-    document.getElementById('help').innerHTML = "Possible moves :<br>search<br>eat (1 Food, +10HP)<br>drink (1 water, +10HP)<br>teleport planet_? (3 gas)<br>build or weapon (3 iron and 3 wood, +1 weapon)";
+    document.getElementById('help').innerHTML = "Possible moves :<br>search<br>eat (1 Food, +10HP)<br>drink (1 water, +10HP)<br>teleport planet_? (3 gas)<br>build or weapon (3 iron and 3 wood, +1 weapon)<br>kill (1 weapon, +1XP)<br>wait (-20HP)";
 }
 
 
