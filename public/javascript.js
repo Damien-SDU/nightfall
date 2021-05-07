@@ -94,17 +94,26 @@ function parseCommand(command) {
 
 
     // x%y proba zombies
-
+    var flag = 0;
     if (player.data.hp>0){
-        //var loca=player.location;
-        //console.log(loca);
-        //if (number_zombies[loca] == 0) {
+        if (player.data.moves>30){
+            if (Math.random()*100>90){
+                var loca=player.location;
+                number_zombies[loca]++;
+                flag = 1;
+                alert("A zombie arrived!");
+            }
+        }
+
+        var loca=player.location;
+        console.log(loca);
+        if (number_zombies[loca] == 0) {
             switch(command[0]) {
                 case "search":
                     search();
                     break;
                 case "teleport":
-                    if (player.data.gas>=20){
+                    if (player.data.gas>=3){
                         teleport(command);
                     }
                     else{
@@ -129,7 +138,7 @@ function parseCommand(command) {
                     break;
                 case "weapon":
                 case "build":
-                    if (player.data.wood>9 && player.data.iron>9){
+                    if (player.data.wood>=3 && player.data.iron>=3){
                             weapon();
                         }
                         else{
@@ -140,23 +149,31 @@ function parseCommand(command) {
                     invalidCommand(command);
                     alert('Unvalid request');
             }
-        /*}
-        else { // zombies attack
-            switch(command[0]) {
-                case "kill":
-                    kill();
-                    break;
-                case "hide":
-                    hide();
-                    break;
-                }
-        }*/
+        }
+        else {
+            if (flag == 0){
+                // zombies attack
+                switch(command[0]) {
+                    case "kill":
+                        if (player.data.weapon>0){
+                                kill();
+                            }
+                            else{
+                                alert('You don\'t have enough weapon');
+                            }
+                        break;
+                    case "hide":
+                        hide();
+                        break;
+                    default:
+                        invalidCommand(command);
+                        alert('Unvalid request');
+                    }
+            }
+        }
 
 
-
-
-
-    }
+    }// still not dead, end
     else {
         if (player.data==""){// case player not logged in
             alert("Please log in first");
@@ -247,7 +264,7 @@ function teleport(planet) {
         default:
             invalidCommand(planet);
     }
-    player.data.gas = player.data.gas-20;
+    player.data.gas = player.data.gas-3;
     player.data.moves++;
     player.data.hp--;
 }
@@ -259,17 +276,27 @@ function eat(){
 }
 
 function drink(){
-    player.data.hp = player.data.hp+21;
+    player.data.hp = player.data.hp+10;
     player.data.water--;
     player.data.moves++;
-    player.data.hp--;
 }
 
 function weapon(){
     player.data.weapon++;
-    player.data.wood = player.data.wood-10;
-    player.data.iron = player.data.iron-10;
+    player.data.wood = player.data.wood-3;
+    player.data.iron = player.data.iron-3;
     player.data.hp--;
+}
+
+function kill(){
+    player.data.xp++;
+    player.data.weapon--;
+    var loca=player.location;
+    number_zombies[loca]--;
+}
+
+function hide(){
+    player.data.hp = player.data.hp - 20;
 }
 
 function invalidCommand(cmd) {
@@ -280,11 +307,12 @@ function functionClickLogin() {
     var user_login = document.getElementById("login_text").value;
     console.log(user_login);
     socket.emit('user_connection', user_login);
+    player.location = "planet_a";
     player.name = user_login.toLowerCase().split(' ').join('-').replace(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g, "-").replace(/[^a-zA-Z ]/g, "");
     //console.log(player.location);
     ajaxGet();
     update_scores();
-    document.getElementById('help').innerHTML = "Possible moves :<br>search<br>eat<br>drink<br>teleport planet_?<br>build or weapon";
+    document.getElementById('help').innerHTML = "Possible moves :<br>search<br>eat (1 Food, +10HP)<br>drink (1 water, +10HP)<br>teleport planet_? (3 gas)<br>build or weapon (3 iron and 3 wood, +1 weapon)";
 }
 
 
@@ -360,7 +388,7 @@ function updateHTML(){ // à compléter !
     
     
     
-    document.getElementById('ressources').innerHTML = "Ressources";
+    document.getElementById('ressources').innerHTML = "Ressources of the player";
     document.getElementById('room').innerHTML = "Nightfall";
     document.getElementById('moves').innerHTML = "Moves: "+ player.data.moves;
     document.getElementById('hp').innerHTML = "HP: "+ player.data.hp;
