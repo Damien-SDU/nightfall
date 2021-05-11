@@ -14,19 +14,7 @@
     <script type="text/javascript" src="javascript.js" defer></script>
   
 </head>
-<!--
-<script>
-    window.addEventListener('load', function() {
 
-    // initial state of the game
-    let state = {moves: 0, hp: 100, xp: 0};
-    
-    // the display that will show what happens
-    const food = document.getElementById('food');
-    food.innerHTML = 'Your status is now: ' + JSON.stringify(state);
-                    //`your hp is ${state.hp}, and ...`;
-});
-</script> -->
 <script>
     scores = {moves: 0, hp: 100, xp: 0, gas: 0, wood: 0, iron: 0, water: 0, food: 0};
     myJSON = JSON.stringify(scores);
@@ -58,7 +46,6 @@
     <br>
     <br>
 
-    <!-- <input type="button" value="Write to the server" id="poke" /> -->
     <div class="scorebar">
         <div id="ressources"></div>
         <div id="gas"></div>
@@ -70,6 +57,7 @@
     </div>
 
     <div class="scorebar">
+        <div id="game"></div>
         <div id="room"></div>
         <div id="moves"></div>
         <div id="hp"></div>
@@ -95,18 +83,8 @@ VVVV \   |  |    |  |    /VVVV
     \  \ \  \^^^^/  /  / /
      \    ----------    /</pre>
     </form>
-
-
-
     <div>
         <div id="history"></div>
     </div>
-
-
-
-    
-
 </body>
-
-
 </html>

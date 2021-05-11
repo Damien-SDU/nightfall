@@ -4,21 +4,16 @@ var http = require('http').Server(app);
 var port = process.env.PORT || 3000
 var fs = require('fs');
 
-// mise en place du routeur
 var router = express.Router();
-// pour parser un POST JSON
 var bodyParser = require('body-parser');
 app.use(bodyParser.json());
-// servir le dossier "public"
 app.use(express.static('public'));
 
-// récup d'une requête POST
 app.post("/", function(req,res){
     console.log(req.body);
 
     console.log("ici");
     console.log(req.body.name);
-    // écriture du fichier data.json
     var formData = JSON.stringify(req.body);
     fs.writeFile("public/data/players/"+req.body.name+".json", formData, function (err) {
         if (err) return console.log(err);
@@ -33,20 +28,72 @@ app.post("/", function(req,res){
 var io = require('socket.io')(http);
 io.on('connection', function (socket) {
 
-    // envoi d'un message à l'utilisateur
-    // socket.emit('message', 'Vous êtes connecté');
-
-    // envoi d'un message à tous les utilisateurs
     socket.broadcast.emit('message', 'A new player logged in');
 
-    // réception d'un message d'un client
     socket.on('message', function (message) {
         console.log('Mesage d\'un client : ' + message);
     });
+
     socket.on('user_connection', function (login) {
         user_connection(socket, login);
 
     });
+
+    socket.on('zombie_appear', function (location) {
+        console.log(location);
+        console.log("+1 zombie");
+        fs.readFile('public/data/nbzombies.json', 'utf8', function (err,data) {
+            if (err) {
+                return console.log(err);
+            }
+            var data = JSON.parse(data);
+            data[location]++;
+
+            var data = JSON.stringify(data);
+
+            fs.writeFile("public/data/nbzombies.json", data, function (err) {
+                if (err) return console.log(err);
+            });
+        });
+    });
+
+
+    socket.on('zombie_kill', function (location) {
+        console.log(location);
+        console.log("-1 zombie");
+        fs.readFile('public/data/nbzombies.json', 'utf8', function (err,data) {
+            if (err) {
+                return console.log(err);
+            }
+            var data = JSON.parse(data);
+            data[location]--;
+
+            var data = JSON.stringify(data);
+
+            fs.writeFile("public/data/nbzombies.json", data, function (err) {
+                if (err) return console.log(err);
+            });
+        });
+    });
+
+
+    socket.on('zombie_reset', function (location) {
+        console.log("0 zombie");
+        fs.readFile('public/data/nbzombies.json', 'utf8', function (err,data) {
+            if (err) {
+                return console.log(err);
+            }
+            var data = JSON.parse(data);
+            data = {"planet_a":0,"planet_b":0,"planet_c":0};
+
+            var data = JSON.stringify(data);
+
+            fs.writeFile("public/data/nbzombies.json", data, function (err) {
+                if (err) return console.log(err);
+            });
+        });
+    });
+
 
 });
 
@@ -80,6 +127,7 @@ function user_connection(socket, login){
         fs.writeFile(url, start_user, function (err) {
         if (err) return console.log(err);
         });
+        socket.emit('message', 'You are logged in');
     }
     else{
         socket.emit('message', 'You are logged in');

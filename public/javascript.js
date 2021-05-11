@@ -5,12 +5,11 @@ var player = {
 };
 
 var planet_coefficients = {
-    "planet_a":{"gas":15,"wood":30,"iron":45,"water":60,"food":75, "weapon":76},
-    "planet_b":{"gas":5,"wood":20,"iron":55,"water":70,"food":75, "weapon":76},
-    "planet_c":{"gas":20,"wood":25,"iron":30,"water":50,"food":70, "weapon":71},
+    "planet_a":{"gas":15,"wood":30,"iron":45,"water":60,"food":75, "weapon":82},
+    "planet_b":{"gas":5,"wood":20,"iron":55,"water":70,"food":75, "weapon":82},
+    "planet_c":{"gas":20,"wood":25,"iron":30,"water":50,"food":70, "weapon":77},
 }
 
-var number_zombies = {"planet_a":0, "planet_b":0, "planet_c":0}
 
 document.addEventListener("DOMContentLoaded", function() {
     init();
@@ -23,33 +22,18 @@ function init() {
 	// réception d'un message du serveur
     socket.on('message', function(message) {
     	alert('Message du serveur : ' + message);
+        log_success();
     })
-
-    /*var poke = document.querySelector("#poke");
-    poke.addEventListener("click", clickSurPoke);
-
-    function clickSurPoke() {
-    	// envoi d'un message au serveur
-        socket.emit('message', 'There was a click');
-    }*/
-
 
     var user_input = document.querySelector("#user_input");
     user_input.addEventListener("click", submitCommand);
 
-    /* AJAX */
-    
-    // GET
-    //ajaxGet();
-    // POST
-    //ajaxPost();
-
 }
 
 function ajaxGet() {
-    //$.getJSON('/data/data.json', function(data) {
     $.getJSON('/data/players/'+player.name+'.json', function(data) {
         console.log(data);
+        player.location = data.location;
         player.data = data.data;
 
     updateHTML();
@@ -88,19 +72,14 @@ function submitCommand() {
 function parseCommand(command) {
     var command = command.toLowerCase();
     var command = command.split(" ");
-
-    // "go north"
-    //socket.emit('message', 'You are logged in');
-
-
-    // x%y proba zombies
     var flag = 0;
     if (player.data.hp>0){
-        if (player.data.moves>30){
-            if (Math.random()*100>90){//10% risk a zombie appear
+        if (player.data.moves>50){
+            if (Math.random()*100>95){//10% risk a zombie appear
                 var loca=player.location;
-                number_zombies[loca]++;
-                document.getElementById('zombie').innerHTML = number_zombies[loca]+ " zombies!";
+
+                socket.emit('zombie_appear', loca);
+                document.getElementById('zombie').innerHTML = "zombies!";
                 document.getElementById('ascii').style.color = '#000000';
                 flag = 1;
                 alert("A zombie arrived!");
@@ -109,70 +88,75 @@ function parseCommand(command) {
 
         var loca=player.location;
         console.log(loca);
-        if (number_zombies[loca] == 0) {
-            switch(command[0]) {
-                case "search":
-                    search();
-                    break;
-                case "teleport":
-                    if (player.data.gas>=3){
-                        teleport(command);
-                    }
-                    else{
-                        alert('You don\'t have enough gas');
-                    }
-                    break;
-                case "eat":
-                    if (player.data.food>0){
-                            eat();
-                        }
-                        else{
-                            alert('You don\'t have enough food');
-                        }
-                    break;
-                case "drink":
-                    if (player.data.water>0){
-                            drink();
-                        }
-                        else{
-                            alert('You don\'t have enough water');
-                        }
-                    break;
-                case "weapon":
-                case "build":
-                    if (player.data.wood>=3 && player.data.iron>=3){
-                            weapon();
-                        }
-                        else{
-                            alert('You don\'t have enough wood or iron');
-                        }
-                    break;
-                default:
-                    invalidCommand(command);
-                    alert('Unvalid request');
-            }
-        }
-        else {
-            if (flag == 0){
-                // zombies attack
+
+        readTextFile("/data/nbzombies.json", function(text){
+            var number_zombies = JSON.parse(text);
+
+            if (number_zombies[loca] == 0) {
                 switch(command[0]) {
-                    case "kill":
-                        if (player.data.weapon>0){
-                                kill();
+                    case "search":
+                        search();
+                        break;
+                    case "teleport":
+                        if (player.data.gas>=3){
+                            teleport(command);
+                        }
+                        else{
+                            alert('You don\'t have enough gas');
+                        }
+                        break;
+                    case "eat":
+                        if (player.data.food>0){
+                                eat();
                             }
                             else{
-                                alert('You don\'t have enough weapon');
+                                alert('You don\'t have enough food');
                             }
                         break;
-                    case "wait":
-                        wait();
+                    case "drink":
+                        if (player.data.water>0){
+                                drink();
+                            }
+                            else{
+                                alert('You don\'t have enough water');
+                            }
+                        break;
+                    case "weapon":
+                    case "build":
+                        if (player.data.wood>=3 && player.data.iron>=3){
+                                weapon();
+                            }
+                            else{
+                                alert('You don\'t have enough wood or iron');
+                            }
                         break;
                     default:
                         invalidCommand(command);
                         alert('Unvalid request');
-                    }
+                }
             }
-        }
+            else {
+                if (flag == 0){
+                    // zombies attack
+                    switch(command[0]) {
+                        case "kill":
+                            if (player.data.weapon>0){
+                                    kill();
+                                }
+                                else{
+                                    alert('You don\'t have enough weapon');
+                                }
+                            break;
+                        case "wait":
+                            wait();
+                            break;
+                        default:
+                            invalidCommand(command);
+                            alert('Unvalid request');
+                        }
+                }
+            }
+        });
 
 
     }// still not dead, end
@@ -193,7 +177,7 @@ function search() {
     var saveHistory = document.getElementById('history').innerHTML;
     var history = "";
     var coef = Math.floor(Math.random() * 99) + 1;
-    //console.log(player.location);
+
     if (0 <= coef && coef <= planet_coefficients.planet_a.gas){
         console.log(coef);
         item = "gas";
@@ -225,12 +209,6 @@ function search() {
 
 
     if (item != "nothing"){
-        //text = localStorage.getItem("testJSON");//read file
-        //scores = JSON.parse(text);
-        //scores[item] ++;
-        //myJSON = JSON.stringify(scores);
-        //localStorage.setItem("testJSON", myJSON);//write file
-        //document.getElementById(item).innerHTML = (item.charAt(0).toUpperCase() + item.substring(1).toLowerCase())+": "+ scores[item];//update score
         player.data[item]++;
         ajaxPost(player);
         updateHTML();
@@ -294,14 +272,20 @@ function kill(){
     player.data.xp++;
     player.data.weapon--;
     var loca=player.location;
-    number_zombies[loca]--;
-    if (number_zombies[loca] == 0){
-        document.getElementById('zombie').innerHTML = "";
-        document.getElementById('ascii').style.color = '#ffffff';
-    }
-    else{
-        document.getElementById('zombie').innerHTML = number_zombies[loca]+ " zombies!";
-    }
+
+    socket.emit('zombie_kill', loca);
+
+    readTextFile("/data/nbzombies.json", function(text){
+        var number_zombies = JSON.parse(text);
+
+        if (number_zombies[loca] == 0){
+            document.getElementById('zombie').innerHTML = "";
+            document.getElementById('ascii').style.color = '#ffffff';
+        }
+        else{
+            document.getElementById('zombie').innerHTML = number_zombies[loca]+ " zombies!";
+        }
+    });
 }
 
 function wait(){
@@ -313,16 +297,17 @@ function invalidCommand(cmd) {
     console.log('invalid command', cmd);
 }
 
-function functionClickLogin() {
-    var user_login = document.getElementById("login_text").value;
-    console.log(user_login);
-    socket.emit('user_connection', user_login);
-    player.location = "planet_a";
-    player.name = user_login.toLowerCase().split(' ').join('-').replace(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g, "-").replace(/[^a-zA-Z ]/g, "");
-    //console.log(player.location);
+function log_success(){
     ajaxGet();
     update_scores();
     document.getElementById('help').innerHTML = "Possible moves :<br>search<br>eat (1 Food, +10HP)<br>drink (1 water, +10HP)<br>teleport planet_? (3 gas)<br>build or weapon (3 iron and 3 wood, +1 weapon)<br>kill (1 weapon, +1XP)<br>wait (-20HP)";
+}
+
+function functionClickLogin() {
+    var user_login = document.getElementById("login_text").value;
+    console.log(user_login);
+    player.name = user_login.toLowerCase().split(' ').join('-').replace(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g, "-").replace(/[^a-zA-Z ]/g, "");
+    socket.emit('user_connection', user_login);
 }
 
 
@@ -334,6 +319,7 @@ function functionClickLogout() {
     document.getElementById('history').innerHTML = "";
     document.getElementById('help').innerHTML = "";
     document.getElementById('ressources').innerHTML = "";
+    document.getElementById('game').innerHTML = "";
     document.getElementById('room').innerHTML = "";
     document.getElementById('moves').innerHTML = "";
     document.getElementById('hp').innerHTML = "";
@@ -348,8 +334,7 @@ function functionClickLogout() {
     update_scores();
     }
 
-function functionClick() { // incomplet !!!!!!!!!!!!!
-    //console.log(player.data);
+function functionClick() {
     ajaxPost(player);
     updateHTML();
 }
@@ -357,6 +342,13 @@ function functionClick() { // incomplet !!!!!!!!!!!!!
 function functionClickReset() {
     player.data = {"moves":0,"hp":100,"xp":0,"gas":0,"wood":0,"iron":0,"water":0,"food":0, "weapon":0};
     player.location = "planet_a";
+
+
+    socket.emit('zombie_reset');
+
+
+    document.getElementById('zombie').innerHTML = "";
+    document.getElementById('ascii').style.color = '#ffffff';
     ajaxPost(player);
     ajaxGet();
     updateHTML();
@@ -377,10 +369,6 @@ function readTextFile(file, callback) {
 function update_scores(){
     readTextFile("/data/players.json", function(text){
     var data = JSON.parse(text);
-    //console.log(data);
-    //console.log(Object.keys(data).length);
-    //console.log(Object.keys(data)[8]);
-
     document.getElementById('text_scores').innerHTML = "<div>Scores of the players:</div>";
     for (i = 0; i < Object.keys(data).length; i++) {
         var lll = Object.keys(data)[i];
@@ -394,12 +382,11 @@ function update_scores(){
     });
 }
 
-function updateHTML(){ // à compléter !
-    
-    
-    
+function updateHTML(){
     document.getElementById('ressources').innerHTML = "Ressources of the player";
-    document.getElementById('room').innerHTML = "Nightfall";
+    document.getElementById('game').innerHTML = "Nightfall";
+    document.getElementById('room').innerHTML = "You are on " + player.location;
+
     document.getElementById('moves').innerHTML = "Moves: "+ player.data.moves;
     document.getElementById('hp').innerHTML = "HP: "+ player.data.hp;
     document.getElementById('xp').innerHTML = "XP: "+ player.data.xp;
