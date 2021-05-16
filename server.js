@@ -38,9 +38,14 @@ io.on('connection', function (socket) {
         user_connection(socket, login);
     });
 
-    socket.on('chat_message', function (msg) {
+
+
+    socket.on('chat_message', function (msg, playerName) {
         console.log("message reçu:"+msg);
-        socket.emit('chat_message', 'You are logged in');
+        console.log(playerName);
+        socket.broadcast.emit('chat_message', msg, playerName);
+        socket.emit('chat_message', msg, playerName);
+        //io.emit('chat_message', 'You are logged in');
     });
 
 

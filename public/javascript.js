@@ -19,6 +19,7 @@ function init() {
 
 	socket = io.connect();
 
+
 	// réception d'un message du serveur
     socket.on('message', function(message) {
     	alert('Message du serveur : ' + message);
@@ -27,6 +28,14 @@ function init() {
 
     var user_input = document.querySelector("#user_input");
     user_input.addEventListener("click", submitCommand);
+
+
+    socket.on('chat_message', function(msg, playerName){
+        console.log(msg);
+        var saveMessages = document.getElementById('messages').innerHTML;
+        var messages = playerName + ": " + msg;
+        document.getElementById('messages').innerHTML = messages +"<br>"+ saveMessages;
+    });
 
 }
 
@@ -404,15 +413,9 @@ function updateHTML(){
 
 function send() {
     var text = document.getElementById('chat').value;
-    socket.emit('chat_message', text);
+    socket.emit('chat_message', text, player.name);
 }
 
-socket.on('chat_message', function(msg){
-    console.log(msg);
-    var saveMessages = document.getElementById('messages').innerHTML;
-    var messages = "he said " + msg;
-    document.getElementById('messages').innerHTML = messages +"<br>"+ saveMessages;
-});
 
 /*
 
