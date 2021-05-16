@@ -36,8 +36,14 @@ io.on('connection', function (socket) {
 
     socket.on('user_connection', function (login) {
         user_connection(socket, login);
-
     });
+
+    socket.on('chat_message', function (msg) {
+        console.log("message reçu:"+msg);
+        socket.emit('chat_message', 'You are logged in');
+    });
+
+
 
     socket.on('zombie_appear', function (location) {
         console.log(location);

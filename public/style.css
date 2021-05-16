@@ -18,7 +18,27 @@
 	display: inline-block;
 }
 
+#history {
+	display: inline-block;
+}
+
+#chat {
+	display: inline-block;
+}
+
 #text_scores {
+	display: inline-block;
+}
+
+#input_chat {
+	display: inline-block;
+}
+
+#chat {
+	display: inline-block;
+}
+
+#messages {
 	display: inline-block;
 }
 

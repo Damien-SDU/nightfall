@@ -16,14 +16,14 @@
 </head>
 
 <script>
-    scores = {moves: 0, hp: 100, xp: 0, gas: 0, wood: 0, iron: 0, water: 0, food: 0};
-    myJSON = JSON.stringify(scores);
-    localStorage.setItem("testJSON", myJSON);
 
-    text = localStorage.getItem("testJSON");
-    scores = JSON.parse(text);
-    console.log(scores); 
-    console.log(scores.hp); 
+    //var socket = io();
+
+    //socket = io.connect();
+
+
+    
+
 </script>
 
 
@@ -83,8 +83,16 @@ VVVV \   |  |    |  |    /VVVV
     \  \ \  \^^^^/  /  / /
      \    ----------    /</pre>
     </form>
+
+    <div id="history"></div>
+    <ul id="messages"></ul>
     <div>
-        <div id="history"></div>
+        <input id="chat" />
+        <button onclick="send()">Send</button>
     </div>
+
+
+    
+    
 </body>
 </html>

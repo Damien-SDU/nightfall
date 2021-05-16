@@ -30,6 +30,8 @@ function init() {
 
 }
 
+
+
 function ajaxGet() {
     $.getJSON('/data/players/'+player.name+'.json', function(data) {
         console.log(data);
@@ -398,6 +400,19 @@ function updateHTML(){
     document.getElementById('weapon').innerHTML = "Weapon: "+ player.data.weapon;
 }
 
+
+
+function send() {
+    var text = document.getElementById('chat').value;
+    socket.emit('chat_message', text);
+}
+
+socket.on('chat_message', function(msg){
+    console.log(msg);
+    var saveMessages = document.getElementById('messages').innerHTML;
+    var messages = "he said " + msg;
+    document.getElementById('messages').innerHTML = messages +"<br>"+ saveMessages;
+});
 
 /*
 
