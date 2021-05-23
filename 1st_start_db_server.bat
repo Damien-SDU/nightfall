@@ -1,0 +1,1 @@
+"c:\Program Files\MongoDB\Server\4.4\bin\mongod.exe" --dbpath=data --port 27017

@@ -9,6 +9,134 @@ var bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
+
+
+
+// FROM: https://github.com/mongodb/node-mongodb-native
+
+const findDocuments = function(db, callback) {
+  // Get the documents collection
+  const collection = db.collection('documents');
+  // Find all documents
+  collection.find({}).toArray(function(err, docs) {
+    assert.equal(err, null);
+    console.log("Found the following records");
+    console.log(docs)
+    callback(docs);
+  });
+}
+
+const updateDocument = function(db, callback) {
+  // Get the documents collection
+  const collection = db.collection('documents');
+  // Update document where a is 2, set b equal to 1
+  collection.updateOne({ a : 2 }
+    , { $set: { b : 1 } }, function(err, result) {
+    assert.equal(err, null);
+    assert.equal(1, result.result.n);
+    console.log("Updated the document with the field a equal to 2");
+    callback(result);
+  });
+}
+
+const removeDocument = function(db, callback) {
+  // Get the documents collection
+  const collection = db.collection('documents');
+  // Delete document where a is 3
+  collection.deleteOne({ a : 3 }, function(err, result) {
+    assert.equal(err, null);
+    assert.equal(1, result.result.n);
+    console.log("Removed the document with the field a equal to 3");
+    callback(result);
+  });
+}
+
+// *** *** *** *** *** *** *** *** *** ***
+// *** STARTS HERE *** *** *** *** *** ***
+// *** *** *** *** *** *** *** *** *** ***
+
+
+const MongoClient = require('mongodb').MongoClient;
+const assert = require('assert');
+
+// Connection URL
+const url = 'mongodb://localhost:27017';
+// Database Name
+const dbName = 'myproject';
+
+// Use connect method to connect to the server
+MongoClient.connect(url, function(err, client) {
+  assert.equal(null, err);
+  console.log("Connected successfully to server");
+
+  const db = client.db(dbName);
+
+  // do something here... -----------------------------------------------------
+  const insertDocuments = function(db, callback) {
+    // Get the documents collection
+    const collection = db.collection('documents');
+    // Insert some documents
+    collection.insertMany([
+      {"name":"damien","location":"planet_a","data":{"moves":923,"hp":231,"xp":109,"gas":109,"wood":103,"iron":94,"water":158,"food":145,"weapon":54}}, 
+      {"name":"andrea","location":"planet_a","data":{"moves":11,"hp":89,"xp":0,"gas":2,"wood":3,"iron":3,"water":1,"food":1,"weapon":0}},
+      {"name":"pierre","location":"planet_a","data":{"moves":14,"hp":86,"xp":0,"gas":1,"wood":1,"iron":3,"water":5,"food":4,"weapon":2}}
+    ], function(err, result) {
+      assert.equal(err, null);
+      assert.equal(3, result.result.n);
+      assert.equal(3, result.ops.length);
+      console.log("Inserted 3 documents into the collection");
+      callback(result);
+    });
+  }
+
+///*
+  findDocuments(db, function() {
+    insertDocuments(db, function() {
+      findDocuments(db, function() {
+        client.close();
+      });
+    });
+  });
+//*/
+
+/*
+  // TRY THIS INSTEAD:
+  insertDocuments(db, function() {
+    findDocuments(db, function() {
+      updateDocument(db, function() {
+        removeDocument(db, function() {
+          findDocuments(db, function() {
+            client.close();
+          });
+        });
+      });
+    });
+  });
+*/
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 app.post("/", function(req,res){
     console.log(req.body);
 
