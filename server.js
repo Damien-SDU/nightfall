@@ -11,44 +11,45 @@ app.use(express.static('public'));
 
 
 
-
 // FROM: https://github.com/mongodb/node-mongodb-native
 
 const findDocuments = function(db, callback) {
-  // Get the documents collection
-  const collection = db.collection('documents');
-  // Find all documents
-  collection.find({}).toArray(function(err, docs) {
+    // Get the documents collection
+    const collection = db.collection('documents');
+    // Find all documents
+    collection.find({}).toArray(function(err, docs) {
     assert.equal(err, null);
-    console.log("Found the following records");
-    console.log(docs)
+    //console.log("Found the following records");
+    //console.log(docs)
     callback(docs);
-  });
+    });
 }
 
 const updateDocument = function(db, callback) {
-  // Get the documents collection
-  const collection = db.collection('documents');
-  // Update document where a is 2, set b equal to 1
-  collection.updateOne({ a : 2 }
+    // Get the documents collection
+    const collection = db.collection('documents');
+    // Update document where a is 2, set b equal to 1
+    collection.updateOne({ a : 2 }//query
     , { $set: { b : 1 } }, function(err, result) {
     assert.equal(err, null);
     assert.equal(1, result.result.n);
-    console.log("Updated the document with the field a equal to 2");
+    //console.log("Updated the document with the field a equal to 2");
     callback(result);
-  });
+    });
 }
 
+
+
 const removeDocument = function(db, callback) {
-  // Get the documents collection
-  const collection = db.collection('documents');
-  // Delete document where a is 3
-  collection.deleteOne({ a : 3 }, function(err, result) {
+    // Get the documents collection
+    const collection = db.collection('documents');
+    // Delete document where a is 3
+    collection.deleteOne({ a : 3 }, function(err, result) {
     assert.equal(err, null);
     assert.equal(1, result.result.n);
-    console.log("Removed the document with the field a equal to 3");
+    //console.log("Removed the document with the field a equal to 3");
     callback(result);
-  });
+    });
 }
 
 // *** *** *** *** *** *** *** *** *** ***
@@ -66,30 +67,32 @@ const dbName = 'myproject';
 
 // Use connect method to connect to the server
 MongoClient.connect(url, function(err, client) {
-  assert.equal(null, err);
-  console.log("Connected successfully to server");
+    assert.equal(null, err);
+    console.log("Connected successfully to server db");
 
-  const db = client.db(dbName);
+    var db = client.db(dbName);
+    //var query = {name:"damien"};
+    //findOneDocument(db, test, query);
+    // do something here... -----------------------------------------------------
 
-  // do something here... -----------------------------------------------------
-  const insertDocuments = function(db, callback) {
-    // Get the documents collection
-    const collection = db.collection('documents');
-    // Insert some documents
-    collection.insertMany([
-      {"name":"damien","location":"planet_a","data":{"moves":923,"hp":231,"xp":109,"gas":109,"wood":103,"iron":94,"water":158,"food":145,"weapon":54}}, 
-      {"name":"andrea","location":"planet_a","data":{"moves":11,"hp":89,"xp":0,"gas":2,"wood":3,"iron":3,"water":1,"food":1,"weapon":0}},
-      {"name":"pierre","location":"planet_a","data":{"moves":14,"hp":86,"xp":0,"gas":1,"wood":1,"iron":3,"water":5,"food":4,"weapon":2}}
-    ], function(err, result) {
-      assert.equal(err, null);
-      assert.equal(3, result.result.n);
-      assert.equal(3, result.ops.length);
-      console.log("Inserted 3 documents into the collection");
-      callback(result);
-    });
-  }
+    /*const insertDocuments = function(db, callback) {
+        // Get the documents collection
+        const collection = db.collection('documents');
+        // Insert some documents
+        collection.insertMany([
+            {"name":"damien","location":"planet_a","data":{"moves":923,"hp":231,"xp":109,"gas":109,"wood":103,"iron":94,"water":158,"food":145,"weapon":54}}, 
+            {"name":"andrea","location":"planet_a","data":{"moves":11,"hp":89,"xp":0,"gas":2,"wood":3,"iron":3,"water":1,"food":1,"weapon":0}},
+            {"name":"pierre","location":"planet_a","data":{"moves":14,"hp":86,"xp":0,"gas":1,"wood":1,"iron":3,"water":5,"food":4,"weapon":2}}
+        ], function(err, result) {
+            assert.equal(err, null);
+            assert.equal(3, result.result.n);
+            assert.equal(3, result.ops.length);
+            //console.log("Inserted 3 documents into the collection");
+            callback(result);
+        });
+    }*/
 
-///*
+/*
   findDocuments(db, function() {
     insertDocuments(db, function() {
       findDocuments(db, function() {
@@ -97,7 +100,7 @@ MongoClient.connect(url, function(err, client) {
       });
     });
   });
-//*/
+*/
 
 /*
   // TRY THIS INSTEAD:
@@ -118,9 +121,66 @@ MongoClient.connect(url, function(err, client) {
 
 
 
+const findOneDocument = function(db, callback, query){
+    console.log(query);
+    var collection = db.collection('documents');
+    collection.findOne(query, function(err, result) {
+        //console.log(result.data.moves);
+        //console.log(result.data.hp);
+        //emit
+        callback(result);
+    });
+}
+
+const updateStatsPlayer = function(db, callback, query, formData){
+    console.log(query);
+    var collection = db.collection('documents');
+    collection.findOne(query, function(err, result) {
+        //console.log(result.data.moves);
+        //console.log(result.data.hp);
+        //emit
+        callback(result);
+
+        //db.documents.update({"product" : "bottles"},{$set : {"Qty": 10}}  )
+
+        //delete
+        db.collection("documents").deleteOne(query, function(err, obj) {
+            if (err) throw err;
+            console.log("1 document deleted");
+        });
+
+        //insert
+        //(node:7784) DeprecationWarning: collection.insert is deprecated.
+        //Use insertOne, insertMany or bulkWrite instead.
+        db.collection("documents").insertOne(formData, null, function (error, results) {
+            if (error) throw error;
+            console.log("Le document a bien été inséré");    
+        });
 
 
 
+
+
+    });
+}
+
+const scores_db = function(socket, db, message){
+    var collection = db.collection('documents');
+    collection.find({}).toArray(function(err, docs) {
+        assert.equal(err, null);
+        //console.log(docs);
+        //console.log("longueur:"+docs.length);
+        socket.emit('scores_db', docs);
+    });
+
+
+    // just in case
+    /*var dams = {"name":"vincent","location":"planet_a","data":{"moves":928,"hp":226,"xp":19,"gas":111,"wood":105,"iron":94,"water":159,"food":146,"weapon":55}}
+    db.collection("documents").insert(dams, null, function (error, results) {
+        if (error) throw error;
+        console.log("pierre a bien été inséré");    
+    });*/
+}
 
 
 
@@ -143,6 +203,36 @@ app.post("/", function(req,res){
     console.log("ici");
     console.log(req.body.name);
     var formData = JSON.stringify(req.body);
+
+    console.log("app post operer ici");
+
+    MongoClient.connect(url, function(err, client) {
+        var db = client.db(dbName);
+        var query = {name:req.body.name};
+
+        updateStatsPlayer(db, test, query, req.body);
+
+    });
+    function test(data){
+        /* if data == null{
+            createDocument(login);
+        }
+        else{
+            socket.emit('user_data', data);
+        }*/
+        //socket.emit('user_data', data);
+        console.log(data);
+    }
+
+
+
+
+
+
+
+
+
+
     fs.writeFile("public/data/players/"+req.body.name+".json", formData, function (err) {
         if (err) return console.log(err);
     });
@@ -164,6 +254,7 @@ io.on('connection', function (socket) {
 
     socket.on('user_connection', function (login) {
         user_connection(socket, login);
+
     });
 
 
@@ -234,6 +325,13 @@ io.on('connection', function (socket) {
     });
 
 
+    socket.on('scores_db', function (message) {
+        MongoClient.connect(url, function(err, client) {
+            var db = client.db(dbName);
+            scores_db(socket, db, message);
+            //updateStatsPlayer(db, test, query, req.body);
+        });       
+    });
 });
 
 http.listen(port,() => {
@@ -242,7 +340,24 @@ http.listen(port,() => {
 
 function user_connection(socket, login){
     var sanitize_login = login.toLowerCase().split(' ').join('-').replace(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g, "-").replace(/[^a-zA-Z ]/g, "");
+    //console.log(db);
+    MongoClient.connect(url, function(err, client) {
+        var db = client.db(dbName);
+        var query = {name:login};
 
+        findOneDocument(db, test, query);
+
+    });
+    function test(data){
+        /* if data == null{
+            createDocument(login);
+        }
+        else{
+            socket.emit('user_data', data);
+        }*/
+        socket.emit('user_data', data);
+        console.log(data);
+    }
 
     fs.readFile('public/data/players.json', 'utf8', function (err,data) {
     if (err) {

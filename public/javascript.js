@@ -26,6 +26,10 @@ function init() {
         log_success();
     })
 
+    socket.on('user_data', function(message) {
+        console.log(message);
+    })
+
     var user_input = document.querySelector("#user_input");
     user_input.addEventListener("click", submitCommand);
 
@@ -35,6 +39,18 @@ function init() {
         var saveMessages = document.getElementById('messages').innerHTML;
         var messages = playerName + ": " + msg;
         document.getElementById('messages').innerHTML = messages +"<br>"+ saveMessages;
+    });
+
+
+    socket.on('scores_db', function(docs){
+        console.log(docs);
+        document.getElementById('text_scores_db').innerHTML = "<div>Scores of the players(database):</div>";
+        for (i = 0; i < docs.length; i++) {
+            var person = docs[i];
+            sc = document.getElementById('text_scores_db').innerHTML;
+            sc = sc +"<div>" + person.name + ": " + person.data.xp + " XP</div>";
+            document.getElementById('text_scores_db').innerHTML = sc;
+        }
     });
 
 }
@@ -391,6 +407,8 @@ function update_scores(){
     });
     }
     });
+
+    socket.emit('scores_db', 'update_db');
 }
 
 function updateHTML(){

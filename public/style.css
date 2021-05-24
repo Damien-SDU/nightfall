@@ -29,7 +29,9 @@
 #text_scores {
 	display: inline-block;
 }
-
+#text_scores_db {
+	display: inline-block;
+}
 #input_chat {
 	display: inline-block;
 }
