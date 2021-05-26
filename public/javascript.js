@@ -345,18 +345,20 @@ function functionClickLogout() {
     alert("You have been logged out");
     document.getElementById('history').innerHTML = "";
     document.getElementById('help').innerHTML = "";
+
     document.getElementById('ressources').innerHTML = "";
-    document.getElementById('game').innerHTML = "";
-    document.getElementById('room').innerHTML = "";
-    document.getElementById('moves').innerHTML = "";
-    document.getElementById('hp').innerHTML = "";
-    document.getElementById('xp').innerHTML = "";
     document.getElementById('gas').innerHTML = "";
     document.getElementById('wood').innerHTML = "";
     document.getElementById('iron').innerHTML = "";
     document.getElementById('water').innerHTML = "";
     document.getElementById('food').innerHTML = "";
     document.getElementById('weapon').innerHTML = "";
+
+    document.getElementById('game').innerHTML = "";
+    document.getElementById('room').innerHTML = "";
+    document.getElementById('moves').innerHTML = "";
+    document.getElementById('hp').innerHTML = "";
+    document.getElementById('xp').innerHTML = "";
 
     update_scores();
     }
@@ -395,17 +397,17 @@ function readTextFile(file, callback) {
 
 function update_scores(){
     readTextFile("/data/players.json", function(text){
-    var data = JSON.parse(text);
-    document.getElementById('text_scores').innerHTML = "<div>Scores of the players:</div>";
-    for (i = 0; i < Object.keys(data).length; i++) {
-        var lll = Object.keys(data)[i];
-        readTextFile("/data/players/"+lll+".json", function(text){
-            var datall = JSON.parse(text);
-            sc = document.getElementById('text_scores').innerHTML;
-            sc = sc +"<div>" + datall.name + ": " + datall.data.xp + " XP</div>";
-            document.getElementById('text_scores').innerHTML = sc;
-    });
-    }
+        var data = JSON.parse(text);
+        document.getElementById('text_scores').innerHTML = "<div>Scores of the players:</div>";
+        for (i = 0; i < Object.keys(data).length; i++) {
+            var lll = Object.keys(data)[i];
+            readTextFile("/data/players/"+lll+".json", function(text){
+                var datall = JSON.parse(text);
+                sc = document.getElementById('text_scores').innerHTML;
+                sc = sc +"<div>" + datall.name + ": " + datall.data.xp + " XP</div>";
+                document.getElementById('text_scores').innerHTML = sc;
+            });
+        }
     });
 
     socket.emit('scores_db', 'update_db');

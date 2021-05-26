@@ -38,6 +38,22 @@ const updateDocument = function(db, callback) {
     });
 }
 
+const insertDocuments = function(db, callback) {
+    // Get the documents collection
+    const collection = db.collection('documents');
+    // Insert some documents
+    collection.insertMany([
+        {"name":"damien","location":"planet_a","data":{"moves":923,"hp":231,"xp":109,"gas":109,"wood":103,"iron":94,"water":158,"food":145,"weapon":54}}, 
+        {"name":"andrea","location":"planet_a","data":{"moves":11,"hp":89,"xp":0,"gas":2,"wood":3,"iron":3,"water":1,"food":1,"weapon":0}},
+        {"name":"pierre","location":"planet_a","data":{"moves":14,"hp":86,"xp":0,"gas":1,"wood":1,"iron":3,"water":5,"food":4,"weapon":2}}
+    ], function(err, result) {
+        assert.equal(err, null);
+        assert.equal(3, result.result.n);
+        assert.equal(3, result.ops.length);
+        //console.log("Inserted 3 documents into the collection");
+        callback(result);
+    });
+    }
 
 
 const removeDocument = function(db, callback) {
@@ -69,54 +85,6 @@ const dbName = 'myproject';
 MongoClient.connect(url, function(err, client) {
     assert.equal(null, err);
     console.log("Connected successfully to server db");
-
-    var db = client.db(dbName);
-    //var query = {name:"damien"};
-    //findOneDocument(db, test, query);
-    // do something here... -----------------------------------------------------
-
-    /*const insertDocuments = function(db, callback) {
-        // Get the documents collection
-        const collection = db.collection('documents');
-        // Insert some documents
-        collection.insertMany([
-            {"name":"damien","location":"planet_a","data":{"moves":923,"hp":231,"xp":109,"gas":109,"wood":103,"iron":94,"water":158,"food":145,"weapon":54}}, 
-            {"name":"andrea","location":"planet_a","data":{"moves":11,"hp":89,"xp":0,"gas":2,"wood":3,"iron":3,"water":1,"food":1,"weapon":0}},
-            {"name":"pierre","location":"planet_a","data":{"moves":14,"hp":86,"xp":0,"gas":1,"wood":1,"iron":3,"water":5,"food":4,"weapon":2}}
-        ], function(err, result) {
-            assert.equal(err, null);
-            assert.equal(3, result.result.n);
-            assert.equal(3, result.ops.length);
-            //console.log("Inserted 3 documents into the collection");
-            callback(result);
-        });
-    }*/
-
-/*
-  findDocuments(db, function() {
-    insertDocuments(db, function() {
-      findDocuments(db, function() {
-        client.close();
-      });
-    });
-  });
-*/
-
-/*
-  // TRY THIS INSTEAD:
-  insertDocuments(db, function() {
-    findDocuments(db, function() {
-      updateDocument(db, function() {
-        removeDocument(db, function() {
-          findDocuments(db, function() {
-            client.close();
-          });
-        });
-      });
-    });
-  });
-*/
-
 });
 
 
@@ -141,8 +109,6 @@ const updateStatsPlayer = function(db, callback, query, formData){
         //emit
         callback(result);
 
-        //db.documents.update({"product" : "bottles"},{$set : {"Qty": 10}}  )
-
         //delete
         db.collection("documents").deleteOne(query, function(err, obj) {
             if (err) throw err;
@@ -154,29 +120,21 @@ const updateStatsPlayer = function(db, callback, query, formData){
         //Use insertOne, insertMany or bulkWrite instead.
         db.collection("documents").insertOne(formData, null, function (error, results) {
             if (error) throw error;
-            console.log("Le document a bien été inséré");    
+            console.log("1 document inserted");    
         });
-
-
-
-
-
     });
 }
 
 const scores_db = function(socket, db, message){
     var collection = db.collection('documents');
-    collection.find({}).toArray(function(err, docs) {
-        assert.equal(err, null);
-        //console.log(docs);
-        //console.log("longueur:"+docs.length);
-        socket.emit('scores_db', docs);
+    db.collection("documents").find().sort({ 'data.xp': -1 }).toArray(function(err, result) {
+        if (err) throw err;
+        socket.emit('scores_db', result);
     });
 
-
     // just in case
-    /*var dams = {"name":"vincent","location":"planet_a","data":{"moves":928,"hp":226,"xp":19,"gas":111,"wood":105,"iron":94,"water":159,"food":146,"weapon":55}}
-    db.collection("documents").insert(dams, null, function (error, results) {
+    /*var example = {"name":"vincent","location":"planet_a","data":{"moves":928,"hp":226,"xp":19,"gas":111,"wood":105,"iron":94,"water":159,"food":146,"weapon":55}}
+    db.collection("documents").insert(example, null, function (error, results) {
         if (error) throw error;
         console.log("pierre a bien été inséré");    
     });*/
@@ -285,6 +243,11 @@ io.on('connection', function (socket) {
                 if (err) return console.log(err);
             });
         });
+
+
+        //ici db !
+
+
     });
 
 
@@ -304,6 +267,11 @@ io.on('connection', function (socket) {
                 if (err) return console.log(err);
             });
         });
+
+
+        // ici db !
+
+
     });
 
 
@@ -322,6 +290,12 @@ io.on('connection', function (socket) {
                 if (err) return console.log(err);
             });
         });
+
+
+
+        //ici db !
+
+
     });
 
 

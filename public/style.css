@@ -17,6 +17,9 @@
 .scorebar {
 	display: inline-block;
 }
+.scorebar_db {
+	display: inline-block;
+}
 
 #history {
 	display: inline-block;
