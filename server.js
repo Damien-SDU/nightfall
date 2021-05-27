@@ -13,10 +13,10 @@ app.use(express.static('public'));
 
 // FROM: https://github.com/mongodb/node-mongodb-native
 
-const findDocuments = function(db, callback) {
-    // Get the documents collection
-    const collection = db.collection('documents');
-    // Find all documents
+const findPlayers = function(db, callback) {
+    // Get the players collection
+    const collection = db.collection('players');
+    // Find all players
     collection.find({}).toArray(function(err, docs) {
     assert.equal(err, null);
     //console.log("Found the following records");
@@ -26,8 +26,8 @@ const findDocuments = function(db, callback) {
 }
 
 const updateDocument = function(db, callback) {
-    // Get the documents collection
-    const collection = db.collection('documents');
+    // Get the players collection
+    const collection = db.collection('players');
     // Update document where a is 2, set b equal to 1
     collection.updateOne({ a : 2 }//query
     , { $set: { b : 1 } }, function(err, result) {
@@ -38,10 +38,10 @@ const updateDocument = function(db, callback) {
     });
 }
 
-const insertDocuments = function(db, callback) {
-    // Get the documents collection
-    const collection = db.collection('documents');
-    // Insert some documents
+const insertPlayers = function(db, callback) {
+    // Get the players collection
+    const collection = db.collection('players');
+    // Insert some players
     collection.insertMany([
         {"name":"damien","location":"planet_a","data":{"moves":923,"hp":231,"xp":109,"gas":109,"wood":103,"iron":94,"water":158,"food":145,"weapon":54}}, 
         {"name":"andrea","location":"planet_a","data":{"moves":11,"hp":89,"xp":0,"gas":2,"wood":3,"iron":3,"water":1,"food":1,"weapon":0}},
@@ -50,15 +50,15 @@ const insertDocuments = function(db, callback) {
         assert.equal(err, null);
         assert.equal(3, result.result.n);
         assert.equal(3, result.ops.length);
-        //console.log("Inserted 3 documents into the collection");
+        //console.log("Inserted 3 players into the collection");
         callback(result);
     });
     }
 
 
 const removeDocument = function(db, callback) {
-    // Get the documents collection
-    const collection = db.collection('documents');
+    // Get the players collection
+    const collection = db.collection('players');
     // Delete document where a is 3
     collection.deleteOne({ a : 3 }, function(err, result) {
     assert.equal(err, null);
@@ -79,7 +79,7 @@ const assert = require('assert');
 // Connection URL
 const url = 'mongodb://localhost:27017';
 // Database Name
-const dbName = 'myproject';
+const dbName = 'damien_nightfall';
 
 // Use connect method to connect to the server
 MongoClient.connect(url, function(err, client) {
@@ -91,7 +91,7 @@ MongoClient.connect(url, function(err, client) {
 
 const findOneDocument = function(db, callback, query){
     console.log(query);
-    var collection = db.collection('documents');
+    var collection = db.collection('players');
     collection.findOne(query, function(err, result) {
         //console.log(result.data.moves);
         //console.log(result.data.hp);
@@ -102,7 +102,7 @@ const findOneDocument = function(db, callback, query){
 
 const updateStatsPlayer = function(db, callback, query, formData){
     console.log(query);
-    var collection = db.collection('documents');
+    var collection = db.collection('players');
     collection.findOne(query, function(err, result) {
         //console.log(result.data.moves);
         //console.log(result.data.hp);
@@ -110,7 +110,7 @@ const updateStatsPlayer = function(db, callback, query, formData){
         callback(result);
 
         //delete
-        db.collection("documents").deleteOne(query, function(err, obj) {
+        db.collection("players").deleteOne(query, function(err, obj) {
             if (err) throw err;
             console.log("1 document deleted");
         });
@@ -118,7 +118,7 @@ const updateStatsPlayer = function(db, callback, query, formData){
         //insert
         //(node:7784) DeprecationWarning: collection.insert is deprecated.
         //Use insertOne, insertMany or bulkWrite instead.
-        db.collection("documents").insertOne(formData, null, function (error, results) {
+        db.collection("players").insertOne(formData, null, function (error, results) {
             if (error) throw error;
             console.log("1 document inserted");    
         });
@@ -126,22 +126,39 @@ const updateStatsPlayer = function(db, callback, query, formData){
 }
 
 const scores_db = function(socket, db, message){
-    var collection = db.collection('documents');
-    db.collection("documents").find().sort({ 'data.xp': -1 }).toArray(function(err, result) {
+    var collection = db.collection('players');
+    db.collection("players").find().sort({ 'data.xp': -1 }).toArray(function(err, result) {
         if (err) throw err;
         socket.emit('scores_db', result);
     });
 
     // just in case
     /*var example = {"name":"vincent","location":"planet_a","data":{"moves":928,"hp":226,"xp":19,"gas":111,"wood":105,"iron":94,"water":159,"food":146,"weapon":55}}
-    db.collection("documents").insert(example, null, function (error, results) {
+    db.collection("players").insert(example, null, function (error, results) {
         if (error) throw error;
         console.log("pierre a bien été inséré");    
     });*/
 }
 
+const zombies = function (db, loca, callback) {
+    console.log("zombies fct"+loca);
+    var query = {location:loca};
+    //var data_zombies = {location: "planet_a", nb_zombies: 0};
+    var collection = db.collection('zombies');
+    collection.findOne(query, function(err, result) {
+        callback(result, db);
+    });
+        /*db.collection("zombies").insertOne(data_zombies, null, function (error, results) {
+            if (error) throw error;
+            console.log("1 document zombies inserted");    
+        });*/
 
+        /*db.collection("zombies").updateOne(query, { $set: {name: "Mickey", address: "Canyon 123" } }, function(err, res) {
+            if (err) throw err;
+            console.log("1 document updated");
+        });*/
 
+}
 
 
 
@@ -168,10 +185,10 @@ app.post("/", function(req,res){
         var db = client.db(dbName);
         var query = {name:req.body.name};
 
-        updateStatsPlayer(db, test, query, req.body);
+        updateStatsPlayer(db, print_stats_player, query, req.body);
 
     });
-    function test(data){
+    function print_stats_player(data){
         /* if data == null{
             createDocument(login);
         }
@@ -244,9 +261,26 @@ io.on('connection', function (socket) {
             });
         });
 
+        MongoClient.connect(url, function(err, client) {
+            var db = client.db(dbName);
+            zombies(db, location, zombie_appear_fct);
+        });   
+        function zombie_appear_fct(result, db){
+            var collection = db.collection('zombies');
+            collection.findOne({location:result.location}, function(err, result) {
 
-        //ici db !
+                db.collection("zombies").deleteOne({location:result.location}, function(err, obj) {
+                    if (err) throw err;
+                    console.log("1 document zombie deleted");
+                });
 
+                db.collection("zombies").insertOne({location: result.location, nb_zombies: result.nb_zombies+1}, null, function (error, results) {
+                    if (error) throw error;
+                    console.log("1 document zombie inserted");    
+                });
+            });
+            console.log(result);
+        }
 
     });
 
@@ -269,14 +303,35 @@ io.on('connection', function (socket) {
         });
 
 
-        // ici db !
+        MongoClient.connect(url, function(err, client) {
+            var db = client.db(dbName);
+            zombies(db, location, zombie_kill_fct);
+        });   
+        function zombie_kill_fct(result, db){
+            var collection = db.collection('zombies');
+            collection.findOne({location:result.location}, function(err, result) {
+
+                db.collection("zombies").deleteOne({location:result.location}, function(err, obj) {
+                    if (err) throw err;
+                    console.log("1 document zombie deleted");
+                });
+
+                db.collection("zombies").insertOne({location: result.location, nb_zombies: result.nb_zombies-1}, null, function (error, results) {
+                    if (error) throw error;
+                    console.log("1 document zombie inserted");    
+                });
+            });
+            console.log(result);
+
+            socket.emit('zombie_kill', result.nb_zombies-1);
+        }
 
 
     });
 
 
     socket.on('zombie_reset', function (location) {
-        console.log("0 zombie");
+        console.log("0 zombie in "+ location);
         fs.readFile('public/data/nbzombies.json', 'utf8', function (err,data) {
             if (err) {
                 return console.log(err);
@@ -292,8 +347,28 @@ io.on('connection', function (socket) {
         });
 
 
+        MongoClient.connect(url, function(err, client) {
+            var db = client.db(dbName);
+            zombies(db, location, zombies_reset);
+        });   
+        function zombies_reset(result, db){
+            var collection = db.collection('zombies');
+            collection.findOne({location:result.location}, function(err, result) {
 
-        //ici db !
+                db.collection("zombies").deleteOne({location:result.location}, function(err, obj) {
+                    if (err) throw err;
+                    console.log("1 document zombie deleted");
+                });
+
+                db.collection("zombies").insertOne({location: result.location, nb_zombies: 0}, null, function (error, results) {
+                    if (error) throw error;
+                    console.log("1 document zombie inserted");    
+                });
+            });
+            console.log(result);
+        }
+
+        
 
 
     });
@@ -319,10 +394,10 @@ function user_connection(socket, login){
         var db = client.db(dbName);
         var query = {name:login};
 
-        findOneDocument(db, test, query);
+        findOneDocument(db, send_user_data, query);
 
     });
-    function test(data){
+    function send_user_data(data){
         /* if data == null{
             createDocument(login);
         }

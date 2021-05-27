@@ -44,7 +44,7 @@ function init() {
 
     socket.on('scores_db', function(docs){
         console.log(docs);
-        document.getElementById('text_scores_db').innerHTML = "<div>Scores of the players(database):</div>";
+        document.getElementById('text_scores_db').innerHTML = "<div>Scores (db):</div>";
         for (i = 0; i < docs.length; i++) {
             var person = docs[i];
             sc = document.getElementById('text_scores_db').innerHTML;
@@ -53,6 +53,18 @@ function init() {
         }
     });
 
+
+
+    socket.on('zombie_kill', function (number_zombies) {
+        if (number_zombies == 0){
+            document.getElementById('zombie').innerHTML = "";
+            document.getElementById('ascii').style.color = '#000000';
+        }
+        else{
+            document.getElementById('zombie').innerHTML = number_zombies+ " zombies!";
+        }
+
+    });
 }
 
 
@@ -107,7 +119,7 @@ function parseCommand(command) {
 
                 socket.emit('zombie_appear', loca);
                 document.getElementById('zombie').innerHTML = "zombies!";
-                document.getElementById('ascii').style.color = '#000000';
+                document.getElementById('ascii').style.color = '#ff0000';
                 flag = 1;
                 alert("A zombie arrived!");
             }
@@ -302,17 +314,21 @@ function kill(){
 
     socket.emit('zombie_kill', loca);
 
-    readTextFile("/data/nbzombies.json", function(text){
+    /*readTextFile("/data/nbzombies.json", function(text){
         var number_zombies = JSON.parse(text);
 
         if (number_zombies[loca] == 0){
             document.getElementById('zombie').innerHTML = "";
-            document.getElementById('ascii').style.color = '#ffffff';
+            document.getElementById('ascii').style.color = '#000000';
         }
         else{
             document.getElementById('zombie').innerHTML = number_zombies[loca]+ " zombies!";
         }
-    });
+    });*/
+
+
+
+
 }
 
 function wait(){
@@ -327,7 +343,8 @@ function invalidCommand(cmd) {
 function log_success(){
     ajaxGet();
     update_scores();
-    document.getElementById('help').innerHTML = "Possible moves :<br>search<br>eat (1 Food, +10HP)<br>drink (1 water, +10HP)<br>teleport planet_? (3 gas)<br>build or weapon (3 iron and 3 wood, +1 weapon)<br>kill (1 weapon, +1XP)<br>wait (-20HP)";
+    //document.getElementById('help').innerHTML = "Possible moves :<br>search<br>eat (1 Food, +10HP)<br>drink (1 water, +10HP)<br>teleport planet_? (3 gas)<br>build or weapon (3 iron and 3 wood, +1 weapon)<br>kill (1 weapon, +1XP)<br>wait (-20HP)";
+    document.getElementById('help').innerHTML = "<table><tr><th>Commands</th><th>Requirements</th><th>Benefits</th></tr><tr><td>search</td><td>none</td><td>???</td></tr><tr><td>eat</td><td>1 Food</td><td>10HP</td></tr><tr><td>drink</td><td>1 Water</td><td>10HP</td></tr><tr><td>teleport planet_?</td><td>3 gas</td><td>teleport</td></tr><tr><td>build/weapon</td><td>3 Iron + 3 Wood</td><td>1 Weapon</td></tr><tr><td>kill</td><td>1 Weapon</td><td>1XP</td></tr><tr><td>wait</td><td>none</td><td>-20HP</td></tr></table>";
 }
 
 function functionClickLogin() {
@@ -353,8 +370,6 @@ function functionClickLogout() {
     document.getElementById('water').innerHTML = "";
     document.getElementById('food').innerHTML = "";
     document.getElementById('weapon').innerHTML = "";
-
-    document.getElementById('game').innerHTML = "";
     document.getElementById('room').innerHTML = "";
     document.getElementById('moves').innerHTML = "";
     document.getElementById('hp').innerHTML = "";
@@ -373,11 +388,11 @@ function functionClickReset() {
     player.location = "planet_a";
 
 
-    socket.emit('zombie_reset');
+    socket.emit('zombie_reset', player.location);
 
 
     document.getElementById('zombie').innerHTML = "";
-    document.getElementById('ascii').style.color = '#ffffff';
+    document.getElementById('ascii').style.color = '#000000';
     ajaxPost(player);
     ajaxGet();
     updateHTML();
@@ -398,7 +413,7 @@ function readTextFile(file, callback) {
 function update_scores(){
     readTextFile("/data/players.json", function(text){
         var data = JSON.parse(text);
-        document.getElementById('text_scores').innerHTML = "<div>Scores of the players:</div>";
+        document.getElementById('text_scores').innerHTML = "<div>Scores:</div>";
         for (i = 0; i < Object.keys(data).length; i++) {
             var lll = Object.keys(data)[i];
             readTextFile("/data/players/"+lll+".json", function(text){
@@ -415,7 +430,6 @@ function update_scores(){
 
 function updateHTML(){
     document.getElementById('ressources').innerHTML = "Ressources of the player";
-    document.getElementById('game').innerHTML = "Nightfall";
     document.getElementById('room').innerHTML = "You are on " + player.location;
 
     document.getElementById('moves').innerHTML = "Moves: "+ player.data.moves;

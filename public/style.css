@@ -4,6 +4,13 @@
     box-sizing: border-box;
 }
 
+body {
+	font-family: 'Fira Code', monospace;
+	font-size: 2.3vmin;
+    background-color: black; /* Le fond de la page sera noir */
+    color: white; /* Le texte de la page sera blanc */
+}
+
 .cursor {
 	position: absolute;
 
@@ -14,15 +21,57 @@
 	background: black;
 }
 
+table {
+    border-collapse: collapse;
+}
+td, th {
+    border: 1px solid grey;
+}
+
+#nightfall_title {
+  	background-color: #000000;
+  	display: flex;
+  	height: 100%;
+  	width: 100%;
+  	padding: 1rem;
+  	justify-content: center;
+  	align-items: center;
+}
+
+#title {
+	font-family: sans-serif;
+  	font-size: 8vh;
+  	text-shadow: 4px 4px 0px #ff0000;
+  	mix-blend-mode: screen;
+  	animation: fadeIn 2.5s linear forwards;
+}
+@keyframes fadeIn {
+    0% {
+        opacity: 0
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+#title:hover {
+	text-shadow: 8px 8px 0px #ff0000;
+}
+
+
+
 .scorebar {
 	display: inline-block;
+	text-align: right;
 }
 .scorebar_db {
 	display: inline-block;
+	text-align: right;
 }
 
 #history {
 	display: inline-block;
+	align-items: flex-start;
 }
 
 #chat {
@@ -31,20 +80,31 @@
 
 #text_scores {
 	display: inline-block;
+	text-align: right;
 }
 #text_scores_db {
 	display: inline-block;
+	text-align: right;
+}
+#texts {
+	display: inline-block;
+	justify-content: flex-start;
+	align-items: flex-start;
 }
 #input_chat {
 	display: inline-block;
 }
-
-#chat {
+#input_commands {
 	display: inline-block;
 }
 
+#chat {
+	align-items: flex-start;
+}
+
 #messages {
-	display: inline-block;
+	align-items: flex-start;
+	align-items: flex-start;
 }
 
 #help {
@@ -56,15 +116,18 @@
 }
 #ascii {
 	display: inline-block;
-	color: white;
+	color: black;
+	font-weight: 900;
 }
 
 #gas{
 	justify-content: flex-end;
 }
 
+
+
 #login_button, #logout_button, #reset_button{
-	box-shadow: 3px 4px 3px 0px #6d6665;
+	box-shadow: 3px 4px 3px 0px #ff0000;
 	border-radius:10px;
 	border:1px solid #000000;
 	cursor:pointer;
@@ -81,12 +144,12 @@
     margin : 1px;
 }
 #login_button:hover, #logout_button:hover, #reset_button:hover {
-	background-color:#1d3ca0;
+	background-color:#ff0000;
 }
 
-#user_input {
-	box-shadow: 3px 4px 3px 0px #6d6665;
-	background-color:#2952db;
+#user_input, #chat_button {
+	box-shadow: 3px 4px 3px 0px #ff0000;
+	background-color:#ff0000;
 	border-radius:10px;
 	border:1px solid #000000;
 	display:inline-block;
@@ -98,6 +161,7 @@
 	text-decoration:none;
 	text-shadow:0px 1px 0px #000000;
 }
-#user_input:hover {
-	background-color:#1d3ca0;
+#user_input:hover, #chat_button:hover {
+	background-color:#ffffff;
+	color:#000000;
 }
