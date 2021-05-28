@@ -44,7 +44,7 @@ function init() {
 
     socket.on('scores_db', function(docs){
         console.log(docs);
-        document.getElementById('text_scores_db').innerHTML = "<div>Scores (db):</div>";
+        document.getElementById('text_scores_db').innerHTML = "<div>Scores:</div>";
         for (i = 0; i < docs.length; i++) {
             var person = docs[i];
             sc = document.getElementById('text_scores_db').innerHTML;
@@ -65,38 +65,96 @@ function init() {
         }
 
     });
-}
 
 
-
-function ajaxGet() {
-    $.getJSON('/data/players/'+player.name+'.json', function(data) {
+    socket.on('get_player', function(data){
         console.log(data);
         player.location = data.location;
         player.data = data.data;
-
-    updateHTML();
-    })
-    .fail(function() {
-        console.log("error");
-    })
-}
-
-function ajaxPost(formData){
-    //console.log(formData.data["moves"]);
-    $.ajax({
-        type : "POST",
-        contentType : "application/json",
-        url : "/",
-        data : JSON.stringify(formData),
-        dataType : 'json',
-        success: function(data) {
-            console.log(data);
-        },
-        error: function(e) {
-            console.log("ERROR: ", e);
-        }
+        updateHTML();
     });
+
+
+
+
+
+socket.on('nb_zombies', function(number_zombies, flag, command){
+    if (number_zombies == 0) {
+    switch(command[0]) {
+        case "search":
+            search();
+            break;
+        case "teleport":
+            if (player.data.gas>=3){
+                teleport(command);
+            }
+            else{
+                alert('You don\'t have enough gas');
+            }
+            break;
+        case "eat":
+            if (player.data.food>0){
+                    eat();
+                }
+                else{
+                    alert('You don\'t have enough food');
+                }
+            break;
+        case "drink":
+            if (player.data.water>0){
+                    drink();
+                }
+                else{
+                    alert('You don\'t have enough water');
+                }
+            break;
+        case "weapon":
+        case "build":
+            if (player.data.wood>=3 && player.data.iron>=3){
+                    weapon();
+                }
+                else{
+                    alert('You don\'t have enough wood or iron');
+                }
+            break;
+        default:
+            invalidCommand(command);
+            alert('Unvalid request');
+                }
+            }
+            else {
+                if (flag == 0){
+                    // zombies attack
+                    switch(command[0]) {
+                        case "kill":
+                            if (player.data.weapon>0){
+                                    kill();
+                                }
+                                else{
+                                    alert('You don\'t have enough weapon');
+                                }
+                            break;
+                        case "wait":
+                            wait();
+                            break;
+                        default:
+                            invalidCommand(command);
+                            alert('Unvalid request');
+                        }
+                }
+            }
+    });
+
+
+
+
+
+
+
+
+
+
+
 }
 
 
@@ -127,77 +185,7 @@ function parseCommand(command) {
 
         var loca=player.location;
         console.log(loca);
-
-        readTextFile("/data/nbzombies.json", function(text){
-            var number_zombies = JSON.parse(text);
-
-            if (number_zombies[loca] == 0) {
-                switch(command[0]) {
-                    case "search":
-                        search();
-                        break;
-                    case "teleport":
-                        if (player.data.gas>=3){
-                            teleport(command);
-                        }
-                        else{
-                            alert('You don\'t have enough gas');
-                        }
-                        break;
-                    case "eat":
-                        if (player.data.food>0){
-                                eat();
-                            }
-                            else{
-                                alert('You don\'t have enough food');
-                            }
-                        break;
-                    case "drink":
-                        if (player.data.water>0){
-                                drink();
-                            }
-                            else{
-                                alert('You don\'t have enough water');
-                            }
-                        break;
-                    case "weapon":
-                    case "build":
-                        if (player.data.wood>=3 && player.data.iron>=3){
-                                weapon();
-                            }
-                            else{
-                                alert('You don\'t have enough wood or iron');
-                            }
-                        break;
-                    default:
-                        invalidCommand(command);
-                        alert('Unvalid request');
-                }
-            }
-            else {
-                if (flag == 0){
-                    // zombies attack
-                    switch(command[0]) {
-                        case "kill":
-                            if (player.data.weapon>0){
-                                    kill();
-                                }
-                                else{
-                                    alert('You don\'t have enough weapon');
-                                }
-                            break;
-                        case "wait":
-                            wait();
-                            break;
-                        default:
-                            invalidCommand(command);
-                            alert('Unvalid request');
-                        }
-                }
-            }
-        });
-
-
+        socket.emit('nb_zombies', loca, flag, command);
     }// still not dead, end
     else {
         if (player.data==""){// case player not logged in
@@ -249,7 +237,7 @@ function search() {
 
     if (item != "nothing"){
         player.data[item]++;
-        ajaxPost(player);
+        socket.emit('write_player', player);
         updateHTML();
     }
     history = history + "You found " + item;
@@ -313,22 +301,6 @@ function kill(){
     var loca=player.location;
 
     socket.emit('zombie_kill', loca);
-
-    /*readTextFile("/data/nbzombies.json", function(text){
-        var number_zombies = JSON.parse(text);
-
-        if (number_zombies[loca] == 0){
-            document.getElementById('zombie').innerHTML = "";
-            document.getElementById('ascii').style.color = '#000000';
-        }
-        else{
-            document.getElementById('zombie').innerHTML = number_zombies[loca]+ " zombies!";
-        }
-    });*/
-
-
-
-
 }
 
 function wait(){
@@ -341,7 +313,7 @@ function invalidCommand(cmd) {
 }
 
 function log_success(){
-    ajaxGet();
+    socket.emit('get_player', player.name);
     update_scores();
     //document.getElementById('help').innerHTML = "Possible moves :<br>search<br>eat (1 Food, +10HP)<br>drink (1 water, +10HP)<br>teleport planet_? (3 gas)<br>build or weapon (3 iron and 3 wood, +1 weapon)<br>kill (1 weapon, +1XP)<br>wait (-20HP)";
     document.getElementById('help').innerHTML = "<table><tr><th>Commands</th><th>Requirements</th><th>Benefits</th></tr><tr><td>search</td><td>none</td><td>???</td></tr><tr><td>eat</td><td>1 Food</td><td>10HP</td></tr><tr><td>drink</td><td>1 Water</td><td>10HP</td></tr><tr><td>teleport planet_?</td><td>3 gas</td><td>teleport</td></tr><tr><td>build/weapon</td><td>3 Iron + 3 Wood</td><td>1 Weapon</td></tr><tr><td>kill</td><td>1 Weapon</td><td>1XP</td></tr><tr><td>wait</td><td>none</td><td>-20HP</td></tr></table>";
@@ -379,7 +351,7 @@ function functionClickLogout() {
     }
 
 function functionClick() {
-    ajaxPost(player);
+    socket.emit('write_player', player);
     updateHTML();
 }
 
@@ -393,38 +365,11 @@ function functionClickReset() {
 
     document.getElementById('zombie').innerHTML = "";
     document.getElementById('ascii').style.color = '#000000';
-    ajaxPost(player);
-    ajaxGet();
+    socket.emit('write_player', player);
     updateHTML();
     }
 
-function readTextFile(file, callback) {
-    var rawFile = new XMLHttpRequest();
-    rawFile.overrideMimeType("application/json");
-    rawFile.open("GET", file, true);
-    rawFile.onreadystatechange = function() {
-        if (rawFile.readyState === 4 && rawFile.status == "200") {
-            callback(rawFile.responseText);
-        }
-    }
-    rawFile.send(null);
-}
-
 function update_scores(){
-    readTextFile("/data/players.json", function(text){
-        var data = JSON.parse(text);
-        document.getElementById('text_scores').innerHTML = "<div>Scores:</div>";
-        for (i = 0; i < Object.keys(data).length; i++) {
-            var lll = Object.keys(data)[i];
-            readTextFile("/data/players/"+lll+".json", function(text){
-                var datall = JSON.parse(text);
-                sc = document.getElementById('text_scores').innerHTML;
-                sc = sc +"<div>" + datall.name + ": " + datall.data.xp + " XP</div>";
-                document.getElementById('text_scores').innerHTML = sc;
-            });
-        }
-    });
-
     socket.emit('scores_db', 'update_db');
 }
 

@@ -91,8 +91,7 @@ MongoClient.connect(url, function(err, client) {
 
 const findOneDocument = function(db, callback, query){
     console.log(query);
-    var collection = db.collection('players');
-    collection.findOne(query, function(err, result) {
+    db.collection("players").findOne({name:"damien"}, function(err, result) {
         //console.log(result.data.moves);
         //console.log(result.data.hp);
         //emit
@@ -160,44 +159,13 @@ const zombies = function (db, loca, callback) {
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-app.post("/", function(req,res){
-    console.log(req.body);
-
-    console.log("ici");
-    console.log(req.body.name);
-    var formData = JSON.stringify(req.body);
-
-    console.log("app post operer ici");
-
-    MongoClient.connect(url, function(err, client) {
-        var db = client.db(dbName);
-        var query = {name:req.body.name};
-
-        updateStatsPlayer(db, print_stats_player, query, req.body);
-
+const read_zombies = function (db, callback, loca, flag, command){
+    var collection = db.collection('zombies');
+    var query = {location:loca};
+    collection.findOne(query, function(err, result) {
+        callback(result.nb_zombies, flag, command);
     });
-    function print_stats_player(data){
-        /* if data == null{
-            createDocument(login);
-        }
-        else{
-            socket.emit('user_data', data);
-        }*/
-        //socket.emit('user_data', data);
-        console.log(data);
-    }
+}
 
 
 
@@ -205,15 +173,6 @@ app.post("/", function(req,res){
 
 
 
-
-
-
-    fs.writeFile("public/data/players/"+req.body.name+".json", formData, function (err) {
-        if (err) return console.log(err);
-    });
-    
-    return res.send(req.body);
-});
 
 
 
@@ -286,23 +245,6 @@ io.on('connection', function (socket) {
 
 
     socket.on('zombie_kill', function (location) {
-        console.log(location);
-        console.log("-1 zombie");
-        fs.readFile('public/data/nbzombies.json', 'utf8', function (err,data) {
-            if (err) {
-                return console.log(err);
-            }
-            var data = JSON.parse(data);
-            data[location]--;
-
-            var data = JSON.stringify(data);
-
-            fs.writeFile("public/data/nbzombies.json", data, function (err) {
-                if (err) return console.log(err);
-            });
-        });
-
-
         MongoClient.connect(url, function(err, client) {
             var db = client.db(dbName);
             zombies(db, location, zombie_kill_fct);
@@ -325,28 +267,10 @@ io.on('connection', function (socket) {
 
             socket.emit('zombie_kill', result.nb_zombies-1);
         }
-
-
     });
 
 
     socket.on('zombie_reset', function (location) {
-        console.log("0 zombie in "+ location);
-        fs.readFile('public/data/nbzombies.json', 'utf8', function (err,data) {
-            if (err) {
-                return console.log(err);
-            }
-            var data = JSON.parse(data);
-            data = {"planet_a":0,"planet_b":0,"planet_c":0};
-
-            var data = JSON.stringify(data);
-
-            fs.writeFile("public/data/nbzombies.json", data, function (err) {
-                if (err) return console.log(err);
-            });
-        });
-
-
         MongoClient.connect(url, function(err, client) {
             var db = client.db(dbName);
             zombies(db, location, zombies_reset);
@@ -367,10 +291,6 @@ io.on('connection', function (socket) {
             });
             console.log(result);
         }
-
-        
-
-
     });
 
 
@@ -380,6 +300,53 @@ io.on('connection', function (socket) {
             scores_db(socket, db, message);
             //updateStatsPlayer(db, test, query, req.body);
         });       
+    });
+
+
+    socket.on('get_player', function (name) {
+        MongoClient.connect(url, function(err, client) {
+            var db = client.db("damien_nightfall");
+            var query = {name:name};
+            console.log("ici");
+            console.log(query);
+            findOneDocument(db, get_user_data, query);
+        });
+        function get_user_data(data){
+            socket.emit('get_player', data);
+            console.log("la");
+            console.log(data);
+        }
+
+    });
+
+
+    socket.on('write_player', function (player) {
+        MongoClient.connect(url, function(err, client) {
+            var db = client.db("damien_nightfall");
+            var query = {name:player.name};
+
+            updateStatsPlayer(db, print_stats_player, query, player);
+
+        });
+        function print_stats_player(data){
+            console.log(data);
+        }
+    });
+
+
+
+
+
+    socket.on('nb_zombies', function (loca, flag, command) {
+        MongoClient.connect(url, function(err, client) {
+            var db = client.db("damien_nightfall");
+            read_zombies(db, print_nb_zombies, loca, flag, command);
+        });
+        function print_nb_zombies(number, flag, command){
+            console.log("iciii");
+            console.log(number);
+            socket.emit('nb_zombies', number, flag, command);
+        }
     });
 });
 
@@ -398,46 +365,10 @@ function user_connection(socket, login){
 
     });
     function send_user_data(data){
-        /* if data == null{
-            createDocument(login);
-        }
-        else{
-            socket.emit('user_data', data);
-        }*/
         socket.emit('user_data', data);
         console.log(data);
     }
-
-    fs.readFile('public/data/players.json', 'utf8', function (err,data) {
-    if (err) {
-        return console.log(err);
-    }
-    var data = JSON.parse(data);
-
-    var key_login = Object.keys(data).find(key => data[key] === login);
-    if (key_login == undefined){
-        data[sanitize_login] = login;
-        var data = JSON.stringify(data);
-        fs.writeFile("public/data/players.json", data, function (err) {
-        if (err) return console.log(err);
-        });
-        var start_user = {};
-        start_user.name = login;
-        start_user.location = "planet_a";
-        start_user.data = {"moves":0,"hp":100,"xp":0,"gas":0,"wood":0,"iron":0,"water":0,"food":0, "weapon":0};
-        start_user = JSON.stringify(start_user);
-        var url = "public/data/players/"+sanitize_login+".json";
-        fs.writeFile(url, start_user, function (err) {
-        if (err) return console.log(err);
-        });
-        socket.emit('message', 'You are logged in');
-    }
-    else{
-        socket.emit('message', 'You are logged in');
-    }
-    
-
-    });
+    socket.emit('message', 'You are logged in');
 }
 
 
