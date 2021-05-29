@@ -89,13 +89,24 @@ MongoClient.connect(url, function(err, client) {
 
 
 
-const findOneDocument = function(db, callback, query){
+const findOneDocument = function(db, callback, login){
+    var query = {name:login};
     console.log(query);
-    db.collection("players").findOne({name:"damien"}, function(err, result) {
-        //console.log(result.data.moves);
-        //console.log(result.data.hp);
-        //emit
-        callback(result);
+    db.collection("players").findOne(query, function(err, result) {
+        if (result==null){
+            console.log("nulleu");
+            var new_player = { "name" : login, "location" : "planet_a", "data" : { "moves" : 0, "hp" : 100, "xp" : 0, "gas" : 0, "wood" : 0, "iron" : 0, "water" : 0, "food" : 0, "weapon" : 0 } };
+            db.collection("players").insertOne(new_player, null, function (error, results) {
+                if (error) throw error;
+                console.log("1 document inserted");
+            });
+            db.collection("players").findOne(query, function(err, result) {
+                    callback(result);                
+                });
+        }//result= { "name" : "damien", "location" : "planet_a", "data" : { "moves" : 2, "hp" : 528, "xp" : 50, "gas" : 2, "wood" : 1, "iron" : 0, "water" : 2, "food" : 2, "weapon" : 1 } };
+        else {
+            callback(result);
+        }
     });
 }
 
@@ -306,10 +317,8 @@ io.on('connection', function (socket) {
     socket.on('get_player', function (name) {
         MongoClient.connect(url, function(err, client) {
             var db = client.db("damien_nightfall");
-            var query = {name:name};
             console.log("ici");
-            console.log(query);
-            findOneDocument(db, get_user_data, query);
+            findOneDocument(db, get_user_data, name);
         });
         function get_user_data(data){
             socket.emit('get_player', data);
@@ -355,13 +364,9 @@ http.listen(port,() => {
 });
 
 function user_connection(socket, login){
-    var sanitize_login = login.toLowerCase().split(' ').join('-').replace(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g, "-").replace(/[^a-zA-Z ]/g, "");
-    //console.log(db);
     MongoClient.connect(url, function(err, client) {
         var db = client.db(dbName);
-        var query = {name:login};
-
-        findOneDocument(db, send_user_data, query);
+        findOneDocument(db, send_user_data, login);
 
     });
     function send_user_data(data){

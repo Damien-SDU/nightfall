@@ -322,8 +322,13 @@ function log_success(){
 function functionClickLogin() {
     var user_login = document.getElementById("login_text").value;
     console.log(user_login);
-    player.name = user_login.toLowerCase().split(' ').join('-').replace(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g, "-").replace(/[^a-zA-Z ]/g, "");
-    socket.emit('user_connection', user_login);
+    if (user_login=="") {
+        alert("unvalid login");
+    }
+    else {
+        player.name = user_login.toLowerCase().split(' ').join('-').replace(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g, "-").replace(/[^a-zA-Z ]/g, "");
+        socket.emit('user_connection', user_login);
+    }
 }
 
 

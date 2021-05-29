@@ -34,8 +34,6 @@
 
     <br>
 
-    <div id="text_scores"></div>
-
     <div id="text_scores_db"></div>
 
     <div id="help"></div>
@@ -61,33 +59,53 @@
     <br>
 
 
-    <div id="input_commands">
-    <form id="text_input">
-        <label id="example" for="example">Write your command: </label>
-        <input type="text" value="" id="user_command" />
-        <input type="button" value="Send" id="user_input" onclick="functionClick()">
-        <div id="zombie"></div>
-        <pre id="ascii">         ____________
+
+<table>
+    <tr>
+        <td>
+            <form id="text_input">
+                <label id="example" for="example">Write your command: </label>
+                <input type="text" value="" id="user_command" />
+                <input type="button" value="Send" id="user_input" onclick="functionClick()">     
+            </form>
+        </td>
+        <td><div id="input_commands">
+    
+                <div id="input_chat">Chat :
+                    <input id="chat" />
+                    <button onclick="send()" id="chat_button">Send</button>
+                </div>
+            </div>
+        </td>
+        <td><div id="zombie"></div></td>
+    </tr>
+    <tr>
+        <td class="top"><div id="history"></div></td>
+        <td class="top"><div id="messages"></div></td>
+        <td class="top"><pre id="ascii">         ____________
         /            \
        /              \
- ___   |  ===   ===   |
+ ___   |  ===   ===   |   ___
 /   \  \      \/      /  /   \
 ||||<|  \   VVVVVV   /  |>||||
-VVVV \   |  |    |  |    /VVVV
-   \  \  |  |    |  |   / /
-    \  \ \  \^^^^/  /  / /
-     \    ----------    /</pre>
-    </form>
-    <div id="history"></div>
-    </div>
+VVVV \   |  |    |  |   / VVVV
+   \  \  |  |    |  |  /  /
+    \  \ \  \^^^^/  / /  /
+     \    ----------    /</pre></td>
+    </tr>
+ </table>
+
+
+
+
+
 
     
     
-    <div id="input_chat">Chat :
-        <input id="chat" />
-        <button onclick="send()" id="chat_button">Send</button>
-        <div id="messages"></div>
-    </div>
+
+    
+    
+    
 
     
     

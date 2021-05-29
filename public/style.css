@@ -24,8 +24,11 @@ body {
 table {
     border-collapse: collapse;
 }
-td, th {
+div table tr td {
     border: 1px solid grey;
+}
+div table tr th {
+    border: 3px solid grey;
 }
 
 #nightfall_title {
@@ -58,73 +61,35 @@ td, th {
 	text-shadow: 8px 8px 0px #ff0000;
 }
 
-
-
-.scorebar {
-	display: inline-block;
-	text-align: right;
-}
-.scorebar_db {
+.scorebar, .scorebar_db, #text_scores_db {
 	display: inline-block;
 	text-align: right;
 }
 
-#history {
-	display: inline-block;
-	align-items: flex-start;
-}
-
-#chat {
-	display: inline-block;
-}
-
-#text_scores {
-	display: inline-block;
-	text-align: right;
-}
-#text_scores_db {
-	display: inline-block;
-	text-align: right;
-}
 #texts {
 	display: inline-block;
 	justify-content: flex-start;
-	align-items: flex-start;
-}
-#input_chat {
-	display: inline-block;
-}
-#input_commands {
-	display: inline-block;
 }
 
-#chat {
-	align-items: flex-start;
+.top {
+	vertical-align: top;
 }
 
-#messages {
-	align-items: flex-start;
-	align-items: flex-start;
-}
-
-#help {
+#zombie, #help, #chat_button, #chat, #input_commands, #text_input, #input_chat {
 	display: inline-block;
 }
 
-#zombie {
-	display: inline-block;
-}
 #ascii {
-	display: inline-block;
+	position: fixed;
 	color: black;
 	font-weight: 900;
+	display: inline-block;
+	vertical-align: top;
 }
 
 #gas{
 	justify-content: flex-end;
 }
-
-
 
 #login_button, #logout_button, #reset_button{
 	box-shadow: 3px 4px 3px 0px #ff0000;
@@ -132,9 +97,7 @@ td, th {
 	border:1px solid #000000;
 	cursor:pointer;
 	padding:2px 7px;
-	display: flex;
     align-items: center;
-    background-color:#ffffff;
     display:inline-block;
     color:#666666;
     font-family:Arial;
