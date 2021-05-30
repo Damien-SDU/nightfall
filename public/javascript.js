@@ -143,18 +143,13 @@ socket.on('nb_zombies', function(number_zombies, flag, command){
                         }
                 }
             }
+
     });
 
 
-
-
-
-
-
-
-
-
-
+    if (player.name!=""){
+        UpdateHTML();
+    }
 }
 
 
@@ -244,6 +239,7 @@ function search() {
     document.getElementById('history').innerHTML = history +"<br>"+ saveHistory;
     player.data.moves++;
     player.data.hp--;
+    updateHTML();
 }
 
 function teleport(planet) {
@@ -274,18 +270,21 @@ function teleport(planet) {
     player.data.gas = player.data.gas-3;
     player.data.moves++;
     player.data.hp--;
+    updateHTML();
 }
 
 function eat(){
     player.data.hp = player.data.hp+10;
     player.data.food--;
     player.data.moves++;
+    updateHTML();
 }
 
 function drink(){
     player.data.hp = player.data.hp+10;
     player.data.water--;
     player.data.moves++;
+    updateHTML();
 }
 
 function weapon(){
@@ -293,6 +292,7 @@ function weapon(){
     player.data.wood = player.data.wood-3;
     player.data.iron = player.data.iron-3;
     player.data.hp--;
+    updateHTML();
 }
 
 function kill(){
@@ -301,6 +301,7 @@ function kill(){
     var loca=player.location;
 
     socket.emit('zombie_kill', loca);
+    updateHTML();
 }
 
 function wait(){

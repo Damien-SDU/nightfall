@@ -78,6 +78,9 @@ div table tr th {
 #zombie, #help, #chat_button, #chat, #input_commands, #text_input, #input_chat {
 	display: inline-block;
 }
+#input_chat {
+	padding: 20px;
+}
 
 #ascii {
 	position: fixed;

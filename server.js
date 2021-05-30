@@ -19,8 +19,6 @@ const findPlayers = function(db, callback) {
     // Find all players
     collection.find({}).toArray(function(err, docs) {
     assert.equal(err, null);
-    //console.log("Found the following records");
-    //console.log(docs)
     callback(docs);
     });
 }
@@ -94,7 +92,6 @@ const findOneDocument = function(db, callback, login){
     console.log(query);
     db.collection("players").findOne(query, function(err, result) {
         if (result==null){
-            console.log("nulleu");
             var new_player = { "name" : login, "location" : "planet_a", "data" : { "moves" : 0, "hp" : 100, "xp" : 0, "gas" : 0, "wood" : 0, "iron" : 0, "water" : 0, "food" : 0, "weapon" : 0 } };
             db.collection("players").insertOne(new_player, null, function (error, results) {
                 if (error) throw error;
@@ -119,8 +116,14 @@ const updateStatsPlayer = function(db, callback, query, formData){
         //emit
         callback(result);
 
+
+        collection.replaceOne(query, formData).then((ans) => {
+            console.log("Successful");
+        }).then((err) => {
+            console.log(err);
+        })    
         //delete
-        db.collection("players").deleteOne(query, function(err, obj) {
+        /*db.collection("players").replaceOne(query, function(err, obj) {
             if (err) throw err;
             console.log("1 document deleted");
         });
@@ -131,7 +134,7 @@ const updateStatsPlayer = function(db, callback, query, formData){
         db.collection("players").insertOne(formData, null, function (error, results) {
             if (error) throw error;
             console.log("1 document inserted");    
-        });
+        });*/
     });
 }
 
@@ -146,7 +149,7 @@ const scores_db = function(socket, db, message){
     /*var example = {"name":"vincent","location":"planet_a","data":{"moves":928,"hp":226,"xp":19,"gas":111,"wood":105,"iron":94,"water":159,"food":146,"weapon":55}}
     db.collection("players").insert(example, null, function (error, results) {
         if (error) throw error;
-        console.log("pierre a bien été inséré");    
+        console.log("example inserted");    
     });*/
 }
 
@@ -217,19 +220,6 @@ io.on('connection', function (socket) {
     socket.on('zombie_appear', function (location) {
         console.log(location);
         console.log("+1 zombie");
-        fs.readFile('public/data/nbzombies.json', 'utf8', function (err,data) {
-            if (err) {
-                return console.log(err);
-            }
-            var data = JSON.parse(data);
-            data[location]++;
-
-            var data = JSON.stringify(data);
-
-            fs.writeFile("public/data/nbzombies.json", data, function (err) {
-                if (err) return console.log(err);
-            });
-        });
 
         MongoClient.connect(url, function(err, client) {
             var db = client.db(dbName);
@@ -239,7 +229,17 @@ io.on('connection', function (socket) {
             var collection = db.collection('zombies');
             collection.findOne({location:result.location}, function(err, result) {
 
-                db.collection("zombies").deleteOne({location:result.location}, function(err, obj) {
+                var query = {location:result.location};
+                var formData = {location: result.location, nb_zombies: result.nb_zombies+1};
+
+                collection.replaceOne(query, formData).then((ans) => {
+                    console.log("Successful");
+                }).then((err) => {
+                    console.log(err);
+                })
+
+
+                /*db.collection("zombies").deleteOne({location:result.location}, function(err, obj) {
                     if (err) throw err;
                     console.log("1 document zombie deleted");
                 });
@@ -247,7 +247,7 @@ io.on('connection', function (socket) {
                 db.collection("zombies").insertOne({location: result.location, nb_zombies: result.nb_zombies+1}, null, function (error, results) {
                     if (error) throw error;
                     console.log("1 document zombie inserted");    
-                });
+                });*/
             });
             console.log(result);
         }
@@ -264,15 +264,15 @@ io.on('connection', function (socket) {
             var collection = db.collection('zombies');
             collection.findOne({location:result.location}, function(err, result) {
 
-                db.collection("zombies").deleteOne({location:result.location}, function(err, obj) {
-                    if (err) throw err;
-                    console.log("1 document zombie deleted");
-                });
+                var query = {location:result.location};
+                var formData = {location: result.location, nb_zombies: result.nb_zombies-1};
 
-                db.collection("zombies").insertOne({location: result.location, nb_zombies: result.nb_zombies-1}, null, function (error, results) {
-                    if (error) throw error;
-                    console.log("1 document zombie inserted");    
-                });
+                collection.replaceOne(query, formData).then((ans) => {
+                    console.log("Successful");
+                }).then((err) => {
+                    console.log(err);
+                })
+
             });
             console.log(result);
 
@@ -290,15 +290,16 @@ io.on('connection', function (socket) {
             var collection = db.collection('zombies');
             collection.findOne({location:result.location}, function(err, result) {
 
-                db.collection("zombies").deleteOne({location:result.location}, function(err, obj) {
-                    if (err) throw err;
-                    console.log("1 document zombie deleted");
-                });
+                var query = {location:result.location};
+                var formData = {location: result.location, nb_zombies: 0};
 
-                db.collection("zombies").insertOne({location: result.location, nb_zombies: 0}, null, function (error, results) {
-                    if (error) throw error;
-                    console.log("1 document zombie inserted");    
-                });
+                collection.replaceOne(query, formData).then((ans) => {
+                    console.log("Successful");
+                }).then((err) => {
+                    console.log(err);
+                })
+
+
             });
             console.log(result);
         }
@@ -317,12 +318,10 @@ io.on('connection', function (socket) {
     socket.on('get_player', function (name) {
         MongoClient.connect(url, function(err, client) {
             var db = client.db("damien_nightfall");
-            console.log("ici");
             findOneDocument(db, get_user_data, name);
         });
         function get_user_data(data){
             socket.emit('get_player', data);
-            console.log("la");
             console.log(data);
         }
 
@@ -352,7 +351,6 @@ io.on('connection', function (socket) {
             read_zombies(db, print_nb_zombies, loca, flag, command);
         });
         function print_nb_zombies(number, flag, command){
-            console.log("iciii");
             console.log(number);
             socket.emit('nb_zombies', number, flag, command);
         }
